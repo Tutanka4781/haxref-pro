@@ -19,3 +19,9 @@ El botón inicio del partido agrega la hora en la que lo presiones al informe. E
 
 ### Swap / Rotación:
 Puedes presionar el botón de swap y/o el botón (click) de middle mouse (ruedita del mouse). Todos los contadores, tarjetas y amonestaciones cambian de lugar al hacer esto, no afecta al informe generado.
+
+### Autoguardado:
+HaxRef utiliza el caché de el navegador para guardar las partidas, su nombre técnico es LocalStorage. Una vez termine un partido o salgas de él puedes continuar agregando goles, tarjetas y seguir copiando los reportes.
+
+### Funciones adicionales:
+HaxRef puede corregir la hora de inicio, para hacerlo simplemente dá doble click en el botón iniciar, ahora el tiempo empezará a correr desde ese doble click, el informe se actualizará automáticamente.
