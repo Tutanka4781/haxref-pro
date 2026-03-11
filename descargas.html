@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descargas — HaxRef Pro</title>
+<style>
+:root {
+  --accent: #b388ff;
+  --accent-deep: #7c3aed;
+  --bg: #060606;
+  --font-d: 'SF Pro Display', 'Helvetica Neue', 'Arial Black', sans-serif;
+  --font-m: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  --font-b: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: #aaa; font-family: var(--font-b); overflow-x: hidden; min-height: 100vh; }
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 24px 60px; display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(to bottom, rgba(6,6,6,0.92), transparent);
+  backdrop-filter: blur(10px);
+}
+.nav-logo {
+  font-family: var(--font-d); font-size: 15px; font-weight: 900; letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-decoration: none;
+}
+.nav-ver {
+  font-family: var(--font-m); font-size: 8px; letter-spacing: 2px;
+  color: rgba(179,136,255,0.35); background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.15); border-radius: 4px;
+  padding: 2px 6px; vertical-align: middle; margin-left: 4px;
+  -webkit-text-fill-color: rgba(179,136,255,0.35);
+}
+.nav-back {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: 2px; color: #383838;
+  text-decoration: none; text-transform: uppercase;
+  border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-back:hover { color: rgba(179,136,255,0.5); border-color: rgba(124,58,237,0.3); }
+@media (max-width: 600px) { nav { padding: 20px 24px; } }
+
+/* MAIN */
+main { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 140px 40px 100px; }
+
+/* HEADER */
+.page-lbl { font-family: var(--font-m); font-size: 9px; letter-spacing: 4px; color: #383838; text-transform: uppercase; margin-bottom: 14px; }
+.page-title {
+  font-family: var(--font-d); font-size: clamp(32px, 6vw, 56px); font-weight: 900;
+  letter-spacing: -2px; line-height: 0.95; margin-bottom: 16px;
+  background: linear-gradient(100deg, #e8e0ff, #b388ff, #7c3aed, #4a0080, #120020, #4a0080, #7c3aed, #b388ff, #e8e0ff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: titleflow 6s linear infinite;
+}
+@keyframes titleflow { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+.page-sub { font-size: 12px; color: #2a2a2a; font-family: var(--font-m); letter-spacing: 0.5px; margin-bottom: 72px; }
+
+/* LATEST CARD */
+.dl-latest {
+  position: relative;
+  background: linear-gradient(135deg, #0d0618 0%, #08050f 60%, #060606 100%);
+  border: 1px solid rgba(124,58,237,0.35); border-radius: 16px; padding: 40px; margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(179,136,255,0.04), 0 24px 60px rgba(124,58,237,0.1);
+}
+.dl-latest::before {
+  content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%); pointer-events: none;
+}
+.dl-latest::after {
+  content: 'LATEST'; position: absolute; top: -1px; right: 32px;
+  font-family: var(--font-m); font-size: 8px; font-weight: 900; letter-spacing: 3px;
+  color: rgba(179,136,255,0.6); background: #0d0618; padding: 0 10px;
+  border: 1px solid rgba(124,58,237,0.3); border-top: none; border-radius: 0 0 6px 6px;
+}
+.dl-latest-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 32px; }
+.dl-latest-info { flex: 1; }
+.dl-meta { font-family: var(--font-m); font-size: 10px; letter-spacing: 2px; color: rgba(179,136,255,0.35); text-transform: uppercase; margin-bottom: 10px; }
+.dl-latest-info h2 { font-family: var(--font-d); font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
+.dl-latest-info p { font-size: 13px; color: #444; line-height: 1.7; }
+
+/* Botones */
+.dl-latest-actions { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+.dl-btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  background: var(--accent-deep); border: 1px solid var(--accent); color: #fff; text-decoration: none;
+  font-family: var(--font-d); font-size: 12px; font-weight: 900; letter-spacing: 1.5px;
+  padding: 13px 26px; border-radius: 8px; text-transform: uppercase; white-space: nowrap;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.dl-btn-primary:hover { box-shadow: 0 0 28px rgba(179,136,255,0.35); transform: translateY(-1px); }
+.dl-btn-github {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  background: transparent; border: 1px solid #222; color: #444; text-decoration: none;
+  font-family: var(--font-d); font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+  padding: 11px 26px; border-radius: 8px; text-transform: uppercase; white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.dl-btn-github:hover { border-color: #444; color: #888; background: rgba(255,255,255,0.02); }
+
+/* Changelog grid */
+.dl-changelog { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid rgba(124,58,237,0.08); border-radius: 10px; overflow: hidden; }
+.cl-item { padding: 18px 20px; border-right: 1px solid rgba(124,58,237,0.08); border-bottom: 1px solid rgba(124,58,237,0.08); transition: background 0.2s; }
+.cl-item:hover { background: rgba(124,58,237,0.04); }
+.cl-item:nth-child(3n) { border-right: none; }
+.cl-item:nth-last-child(-n+3) { border-bottom: none; }
+.cl-item-title { font-family: var(--font-d); font-size: 12px; font-weight: 800; color: rgba(179,136,255,0.5); margin-bottom: 5px; }
+.cl-item-desc { font-size: 11px; color: #2e2e2e; line-height: 1.6; }
+
+/* HISTORIAL */
+.dl-history-label {
+  font-family: var(--font-m); font-size: 9px; letter-spacing: 4px; color: #222;
+  text-transform: uppercase; margin: 48px 0 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.dl-history-label::before, .dl-history-label::after { content: ''; flex: 1; height: 1px; background: #0f0f0f; }
+.dl-history { display: flex; flex-direction: column; gap: 8px; }
+.dl-card {
+  background: #080808; border: 1px solid #111; border-radius: 10px; padding: 18px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  opacity: 0.6; transition: border-color 0.2s, background 0.2s, opacity 0.2s;
+}
+.dl-card:hover { border-color: #1e1e1e; background: #0a0a0a; opacity: 1; }
+.dl-card-left { display: flex; align-items: center; gap: 20px; flex: 1; }
+.dl-card-ver { font-family: var(--font-d); font-size: 18px; font-weight: 900; color: #252525; flex-shrink: 0; transition: color 0.2s; }
+.dl-card:hover .dl-card-ver { color: #383838; }
+.dl-card-name { font-family: var(--font-d); font-size: 13px; font-weight: 700; color: #2e2e2e; margin-bottom: 3px; transition: color 0.2s; }
+.dl-card:hover .dl-card-name { color: #555; }
+.dl-card-meta { font-family: var(--font-m); font-size: 9px; letter-spacing: 1.5px; color: #1e1e1e; text-transform: uppercase; }
+.dl-btn {
+  flex-shrink: 0; background: transparent; border: 1px solid #161616; color: #2e2e2e;
+  padding: 8px 18px; border-radius: 6px; text-decoration: none;
+  font-family: var(--font-m); font-size: 10px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase;
+  transition: all 0.2s;
+}
+.dl-btn:hover { border-color: #333; color: #666; }
+
+/* FOOTER */
+footer {
+  position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 40px 60px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #0a0a0a; flex-wrap: wrap; gap: 16px;
+}
+.ft-left { font-size: 11px; color: #222; }
+.ft-left a { color: #2a2a2a; text-decoration: none; transition: color 0.2s; }
+.ft-left a:hover { color: var(--accent); }
+.ft-disc { font-size: 10px; color: #1a1a1a; margin-top: 4px; letter-spacing: 0.3px; }
+.ft-claude { display: flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 10px; letter-spacing: 1px; color: #1a1a1a; }
+.ft-claude-ico { width: 22px; height: 22px; border-radius: 5px; background: #0a0a0a; border: 1px solid #111; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #ff6b35; }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 640px) {
+  main { padding: 120px 24px 80px; }
+  .dl-latest { padding: 28px 20px; }
+  .dl-latest-top { flex-direction: column; }
+  .dl-latest-actions { flex-direction: row; width: 100%; }
+  .dl-btn-primary, .dl-btn-github { flex: 1; }
+  .dl-changelog { grid-template-columns: 1fr 1fr; }
+  .cl-item:nth-child(2n) { border-right: none; }
+  .cl-item:nth-child(3n) { border-right: 1px solid rgba(124,58,237,0.08); }
+  footer { padding: 32px 24px 48px; }
+}
+@media (max-width: 420px) {
+  .dl-changelog { grid-template-columns: 1fr; }
+  .cl-item { border-right: none !important; }
+  .dl-latest-actions { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">HaxRef <span class="nav-ver">v2.0</span></a>
+  <a href="index.html" class="nav-back">← Inicio</a>
+</nav>
+
+<main>
+
+  <div class="page-lbl reveal">Repositorio oficial</div>
+  <h1 class="page-title reveal">Descargas</h1>
+  <p class="page-sub reveal">Historial de versiones estables.</p>
+
+  <div class="dl-latest reveal">
+    <div class="dl-latest-top">
+      <div class="dl-latest-info">
+        <div class="dl-meta">Versión estable · 10 Marzo 2026</div>
+        <h2>HaxRef Pro v2.0</h2>
+        <p>Webhooks Discord, mensajes personalizables, exportar/importar y controles de tiempo.</p>
+      </div>
+      <div class="dl-latest-actions">
+        <a href="https://github.com/Tutanka4781/haxref-pro/releases/download/HaxRef-Pro-v2.0/HaxRef.Pro.v2.0.zip" class="dl-btn-primary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar
+        </a>
+        <a href="https://github.com/Tutanka4781/haxref-pro/releases/HaxRef-Pro-v2.0" class="dl-btn-github" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="dl-changelog">
+      <div class="cl-item">
+        <div class="cl-item-title">Webhooks Discord</div>
+        <div class="cl-item-desc">Envío automático de eventos al canal. Goles, tarjetas, inicio y final.</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-item-title">Mensajes personalizables</div>
+        <div class="cl-item-desc">Edita el contenido de cada mensaje desde la pestaña Mensajes.</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-item-title">Webhook Delay</div>
+        <div class="cl-item-desc">Countdown de 10s antes de enviar. Cancela o envía al instante.</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-item-title">Exportar / Importar</div>
+        <div class="cl-item-desc">Selecciona qué partidos exportar en .txt e importa cuando quieras.</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-item-title">Controles de tiempo</div>
+        <div class="cl-item-desc">Inicio, medio tiempo, 2T y final disparan webhooks distintos.</div>
+      </div>
+      <div class="cl-item">
+        <div class="cl-item-title">Extras y fixes</div>
+        <div class="cl-item-desc">Nuevo menú principal, lógicas corregidas y estabilización general.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dl-history-label reveal">Versiones anteriores</div>
+
+  <div class="dl-history">
+    <div class="dl-card reveal">
+      <div class="dl-card-left">
+        <div class="dl-card-ver">1.7</div>
+        <div class="dl-card-info">
+          <div class="dl-card-name">HaxRef Pro v1.7.1</div>
+          <div class="dl-card-meta">Alpha · 26 Feb 2026</div>
+        </div>
+      </div>
+      <a href="https://www.mediafire.com/file/d57kc0gjyqhtuuj/HaxRef_Pro_V1_7_1+(1).html/file" class="dl-btn" target="_blank">Descargar</a>
+    </div>
+    <div class="dl-card reveal">
+      <div class="dl-card-left">
+        <div class="dl-card-ver">1.5</div>
+        <div class="dl-card-info">
+          <div class="dl-card-name">HaxRef Pro v1.5.4</div>
+          <div class="dl-card-meta">Base · 23 Feb 2025</div>
+        </div>
+      </div>
+      <a href="https://www.mediafire.com/file/hwgyf5rjv1k099y/HaxRef_Pro_V1_5.html/file" class="dl-btn" target="_blank">Descargar</a>
+    </div>
+    <div class="dl-card reveal">
+      <div class="dl-card-left">
+        <div class="dl-card-ver">1.0</div>
+        <div class="dl-card-info">
+          <div class="dl-card-name">HaxRef Original v1.0</div>
+          <div class="dl-card-meta">Primera versión · Obsoleta</div>
+        </div>
+      </div>
+      <a href="https://www.mediafire.com/file/9ecum2yyunze09v/HaxRef_pro_v1.0_by_tutanka.exe/file" class="dl-btn" target="_blank">Descargar</a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="ft-left">
+    <div>Hecho por <a href="https://www.youtube.com/@Tutanka4781" target="_blank">Tutanka</a></div>
+    <div class="ft-disc">Proyecto independiente · No afiliado a HaxBall</div>
+  </div>
+  <div class="ft-claude">
+    <div class="ft-claude-ico">✺</div>
+    Hecho con ayuda de Claude
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
