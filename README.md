@@ -4,6 +4,9 @@ Haxref es un proyecto en desarrollo en el lenguaje HTML, CSS y JS.
 
 ## Funciones:
 
+### Webhooks de Discord:
+La nueva función insignia de la 2.0!. Ahora puedes enviar en tiempo real el marcador, las faltas/tarjetas y el inicio, medio tiempo y final del partido a un canal en Discord, todo sin entrar una vez lo configures.
+
 ### Contador de goles:
 La app cuenta con un contador de goles sencillo pero estilizado, click izquierdo suma, click derecho resta.
 
