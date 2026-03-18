@@ -1,6 +1,6 @@
 # HaxRef Pro
 
-Haxref es un proyecto en desarrollo en el lenguaje HTML, CSS y JS. 
+Haxref es un proyecto en desarrollo en HTML, CSS y JS. 
 
 ## Funciones:
 
