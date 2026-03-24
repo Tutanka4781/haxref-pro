@@ -1,7 +1,7 @@
 # HaxRef Pro
 
 Haxref es un proyecto en desarrollo en HTML, CSS y JS. 
-
+Para ver los cambios y versiones más recientes checa este github, la página oficial puede estar desactualizada.
 ## Funciones:
 
 ### Webhooks de Discord:
