@@ -1,6 +1,6 @@
 // ── HaxRef Pro Service Worker ──
 // Incrementa CACHE_VERSION con cada release para forzar actualización
-const CACHE_VERSION = 'haxref-v2.2';
+const CACHE_VERSION = 'haxref-v2.3.0';
 const CACHE_NAME = `haxref-cache-${CACHE_VERSION}`;
 
 // Archivos que se cachean en la instalación
