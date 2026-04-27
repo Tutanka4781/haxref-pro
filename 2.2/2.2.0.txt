@@ -1,0 +1,13 @@
+añadir variables de hora a todos los mensajes en editar mensajes (opcional).
+anti-error si está en medio tiempo o está activo el webhook y no ha iniciado el partido, no puede marcarse gol.
+corregir menú de configuración hay un elemnto fuera de el cuadro de las demás configuraciones, es el aumentar y disminuir de "cada cuantos seg. verif. el webhook" (se llamarán variables de config. de ahora en adelante.
+el evento al borrar un gol previamente agregado o tarjetas cancela el disparo del webhook si estaba en curso, si no estaba en delay borra ese mmensaje que envió
+(asigna un id aumentativo o algo que no se repita a cada mensaje y si uno es eliminado con click derecho o se borra la falta lo hace en todos lados al mismo tiempo, visual y lógicamente)
+hacer que se abra el menú de color de los embeds en cualquier parte de los cuadritos de los colores, no solo en el cuadro del color.
+eliminar el nombre de los equipos arriba de su marcador, ponerlos en la parte superior, donde dice "ejemplo1 vs ejemplo2", obvio con ese glow bonito, rota con el swapteams
+mientras se esté en la pestaña webhooks, el ping se reduce a 2 segundos y no es editable, antes de disparar un webhook también se comprueba.
+añade una pestaña con las redes sociales de haxref pro (igual de discreta que configuración):
+sv de discord oficial:https://discord.gg/xaccYAEM2U | user: tutanka4781 (copiar al portapapeles y decir que es el user de dc del dev) | youtube: https://www.youtube.com/@Tutanka4781
+el botón iniciar juego cambia a iniciado y tiene la apariencia de el boton de finalizar pero en verde, el botón que señala si está en el 1t o 2t indica si está jugando, en el primero, en medio tiempo, en el segundo o si ya acabó el partido
+el modal de mensajes enviados permite editar los mensajes previamente enviados, sin ninguna función compleja, solo los edita como si fuera texto normal y se ven los cambios correspondientes en el mensaje de dc
+si hay alguna variable de mensaje repetida fuera de lo editable (en el mensaje que se envía) lo elimina y deja el que está en el mensaje con la variable escrita

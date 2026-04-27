@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaxRef Pro 2.0 — Guía de Uso</title>
+<style>
+:root {
+  --red: #ff2a2a;
+  --blue: #2a8cff;
+  --bg: #050505;
+  --panel: #0f0f0f;
+  --border: #2a1a40;
+  --accent: #b388ff;
+  --yellow: #ffcc00;
+  --purple-dim: #3d1a6e;
+  --purple-soft: #7c3aed;
+  --discord: #5865f2;
+  --glow: rgba(124,58,237,0.4);
+  --font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'Courier New', Courier, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: #ddd;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND GRID ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(124,58,237,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,58,237,.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 90px 20px 70px;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(124,58,237,.25) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  background: #1a0a2e;
+  border: 1px solid #3d1a6e;
+  color: #7c3aed;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 5px 16px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+  font-family: var(--mono);
+}
+.hero-title {
+  font-size: clamp(52px, 10vw, 92px);
+  font-weight: 900;
+  letter-spacing: -3px;
+  color: #c084fc;
+  filter: drop-shadow(0 0 40px rgba(157,0,255,.6));
+  line-height: 0.95;
+  margin-bottom: 10px;
+}
+.hero-title span {
+  color: #fff;
+  filter: none;
+}
+.hero-sub {
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: #3a1a5a;
+  font-weight: 700;
+  margin-top: 18px;
+  font-family: var(--mono);
+}
+.hero-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, #7c3aed, transparent);
+  margin: 36px auto 0;
+}
+
+/* ── LAYOUT ── */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ── CHAPTER DIVIDERS ── */
+.chapter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 64px 0 32px;
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #3d1a6e;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #5a3a8a;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.chapter-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #2a1a40, transparent);
+}
+
+/* ── SECTION HEADER ── */
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sec-icon {
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0f0820;
+  border: 1px solid #2a1a40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sec-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #c084fc;
+  letter-spacing: -0.5px;
+}
+.sec-title small {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3a1a5a;
+  letter-spacing: 3px;
+  margin-left: 8px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: #0a0a10;
+  border: 1px solid #1a1030;
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.card:hover { border-color: #2a1a40; }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3d1a6e, transparent);
+}
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #4a2a7a;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+}
+.card p {
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.card p + p { margin-top: 10px; }
+
+/* ── NOTE CARD ── */
+.note {
+  background: rgba(88,101,242,.05);
+  border: 1px solid rgba(88,101,242,.15);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #5a5f8a;
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  line-height: 1.7;
+}
+.note b { color: #7c83c4; }
+
+/* ── PILL TAGS ── */
+.pill {
+  display: inline-block;
+  background: #0f0820;
+  border: 1px solid #2a1a40;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #7c3aed;
+  font-family: var(--mono);
+  margin: 2px 3px 2px 0;
+}
+.pill.red   { border-color: rgba(255,42,42,.3);   color: var(--red);      background: rgba(255,42,42,.05); }
+.pill.blue  { border-color: rgba(42,140,255,.3);  color: var(--blue);     background: rgba(42,140,255,.05); }
+.pill.gold  { border-color: rgba(255,204,0,.3);   color: var(--yellow);   background: rgba(255,204,0,.05); }
+.pill.dc    { border-color: rgba(88,101,242,.3);  color: var(--discord);  background: rgba(88,101,242,.05); }
+.pill.green { border-color: rgba(76,175,80,.3);   color: #4caf50;         background: rgba(76,175,80,.05); }
+
+/* ── KBD ── */
+kbd {
+  display: inline-block;
+  background: #0f0820;
+  border: 1px solid #3d1a6e;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ── ROW LIST ── */
+.row-list { display: flex; flex-direction: column; gap: 10px; }
+.row-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 18px;
+  background: #08080e;
+  border: 1px solid #14102a;
+  border-radius: 10px;
+  transition: border-color .2s, background .2s;
+}
+.row-item:hover { border-color: #2a1a40; background: #0d0a1a; }
+.row-item-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+  margin-top: 1px;
+}
+.row-item-body { flex: 1; }
+.row-item-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ccc;
+  margin-bottom: 3px;
+}
+.row-item-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.7;
+}
+
+/* ── SHORTCUT TABLE ── */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 20px;
+  align-items: center;
+}
+.shortcut-keys {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.shortcut-keys span {
+  font-size: 11px;
+  color: #3d1a6e;
+  font-family: var(--mono);
+}
+.shortcut-desc {
+  font-size: 13px;
+  color: #777;
+}
+.shortcut-sep {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: #1a1030;
+}
+
+/* ── VARIABLES GRID ── */
+.vars-block { margin-bottom: 10px; }
+.vars-event {
+  font-size: 11px;
+  color: #4a2a7a;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 6px;
+}
+
+/* ── EVENTS ROW ── */
+.events-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  background: #08080e;
+  border: 1px solid #14102a;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+/* ── TWO COL ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── INLINE ACCENT ── */
+.acc { color: var(--accent); font-weight: 700; }
+.acc-red { color: var(--red); font-weight: 700; }
+.acc-blue { color: var(--blue); font-weight: 700; }
+.acc-gold { color: var(--yellow); font-weight: 700; }
+.acc-dc { color: var(--discord); font-weight: 700; }
+.muted { color: #555; font-size: 13px; }
+.mono { font-family: var(--mono); font-size: 13px; }
+
+/* ── TIMELINE (countdown) ── */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom, #3d1a6e, #1a1030);
+}
+.tl-item {
+  position: relative;
+  padding: 12px 16px;
+  background: #08080e;
+  border: 1px solid #14102a;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: border-color .2s;
+}
+.tl-item:hover { border-color: #2a1a40; }
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -23px;
+  top: 17px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3d1a6e;
+  border: 1px solid #7c3aed;
+  box-shadow: 0 0 8px rgba(124,58,237,.4);
+}
+.tl-title { font-size: 14px; font-weight: 800; color: #bbb; margin-bottom: 4px; }
+.tl-desc  { font-size: 13px; color: #666; line-height: 1.7; }
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px 20px 60px;
+  border-top: 1px solid #0f0820;
+}
+footer .ft-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #2a1a40;
+  letter-spacing: -1px;
+}
+footer .ft-by {
+  font-size: 11px;
+  color: #1a1030;
+  letter-spacing: 4px;
+  margin-top: 6px;
+  font-family: var(--mono);
+}
+
+/* ── FADE IN ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero { animation: fadeUp .6s ease forwards; }
+.container > * { animation: fadeUp .5s ease both; }
+
+/* stagger children */
+.container > *:nth-child(1)  { animation-delay: .05s }
+.container > *:nth-child(2)  { animation-delay: .10s }
+.container > *:nth-child(3)  { animation-delay: .15s }
+.container > *:nth-child(4)  { animation-delay: .20s }
+.container > *:nth-child(5)  { animation-delay: .25s }
+.container > *:nth-child(6)  { animation-delay: .30s }
+.container > *:nth-child(7)  { animation-delay: .35s }
+.container > *:nth-child(8)  { animation-delay: .38s }
+.container > *:nth-child(9)  { animation-delay: .41s }
+.container > *:nth-child(10) { animation-delay: .44s }
+.container > *:nth-child(n+11) { animation-delay: .47s }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #2a1a40; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #5a3a8a; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">MANUAL DE USO · V2.0</div>
+  <div class="hero-title">HaxRef <span>Pro</span></div>
+  <div class="hero-sub">by tutanka</div>
+  <div class="hero-line"></div>
+</div>
+
+<div class="container">
+
+  <!-- ── GENERAL ── -->
+  <div class="chapter">
+    <span class="chapter-num">01</span>
+    <span class="chapter-title">General</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">⚽</div>
+    <div class="sec-title">Inicio rápido</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Pantalla de inicio</div>
+    <p>Al abrir HaxRef verás dos opciones: <span class="acc">Nuevo partido</span> e <span class="acc">Historial</span>. Al dar click en Nuevo partido, si no hay un webhook guardado se te preguntará cómo continuar — puedes omitirlo o configurarlo ahí mismo.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🟥</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Nombre equipo rojo → Nombre equipo azul</div>
+        <div class="row-item-desc">Se te pedirán los nombres uno por uno. Una vez ingresados aparece el marcador y la barra de navegación.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🖱️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Sumar gol — click izquierdo · Restar — click derecho</div>
+        <div class="row-item-desc">Haz click sobre el número del equipo. Los goles solo disparan el webhook y la animación de pelota si el partido está en curso (botón INICIAR presionado).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> al pulsar <kbd>Ctrl</kbd> tienes 1 segundo para presionar la tecla de gol. Si no lo haces, no ocurre nada.</div>
+
+  <!-- HISTORIAL -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">📋</div>
+    <div class="sec-title">Historial</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Organización</div>
+    <p>Los partidos se agrupan por semana. En la barra lateral izquierda puedes filtrar entre <span class="acc">TODO</span>, <span class="acc">ESTA SEM.</span>, <span class="acc">SEM. ANT.</span> y rangos anteriores. Cada partido muestra un badge de color: <span class="acc" style="color:#4caf50">verde</span> si ganó el rojo, <span class="acc-red">rojo</span> si ganó el azul, <span class="acc">morado</span> si empate.</p>
+  </div>
+
+  <div class="row-list">
+    <div class="row-item">
+      <div class="row-item-icon">➜</div>
+      <div class="row-item-body">
+        <div class="row-item-title">VER ➜ / click en el partido</div>
+        <div class="row-item-desc">Carga ese partido en la interfaz principal para consultarlo o continuarlo.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">✕</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Botón × en cada partido</div>
+        <div class="row-item-desc">Elimina ese partido del historial permanentemente.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">＋</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Añadir separador</div>
+        <div class="row-item-desc">Crea un divisor visual con nombre personalizado (ej: <span class="mono">JORNADA 3</span>). Se elimina con su propio botón ×. El historial acepta hasta <span class="acc">40 entradas</span> en total.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FUNCIONES ── -->
+  <div class="chapter">
+    <span class="chapter-num">02</span>
+    <span class="chapter-title">Funciones</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <!-- WEBHOOKS -->
+  <div class="sec-header">
+    <div class="sec-icon" style="font-size:16px">🔗</div>
+    <div class="sec-title">Webhooks <small>DISCORD</small></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Cómo obtener la URL</div>
+    <p>En Discord ve al canal deseado → <span class="acc-dc">Editar canal</span> → <span class="acc-dc">Integraciones</span> → <span class="acc-dc">Webhooks</span> → <span class="acc-dc">Añadir webhook</span>. Haz click en el webhook creado y copia el enlace.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Webhook guardado</div>
+    <p>Si ya guardaste un webhook anteriormente, al iniciar un nuevo partido HaxRef lo verifica automáticamente y muestra un modal con su nombre, servidor e ID. Elige <span class="acc">USAR</span> para conectar directamente o <span class="acc">NUEVO</span> para descartarlo y configurar otro desde la pestaña Discord.</p>
+  </div>
+
+  <div class="two-col" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">COMPROBAR</div>
+      <p>Envía un mensaje de prueba al canal que se borra solo a los <span class="acc">15 segundos</span>.</p>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">CONECTAR / DESCONECTAR</div>
+      <p>Activa o desactiva la conexión. El webhook queda guardado en el navegador para la próxima sesión.</p>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">⏱️</div>
+    <div class="sec-title">Countdown <small>COLA DE ENVÍOS</small></div>
+  </div>
+
+  <div class="card">
+    <p>Cada evento espera <span class="acc">10 segundos</span> antes de enviarse a Discord. Verás una barra morada en la parte superior con los controles:</p>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-title">ENVIAR</div>
+      <div class="tl-desc">Manda el mensaje de inmediato sin esperar los 10 segundos.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">CANCELAR</div>
+      <div class="tl-desc">Descarta el mensaje. No se envía nada a Discord.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">📨 (número)</div>
+      <div class="tl-desc">Abre el historial de mensajes enviados en esta sesión. Desde ahí puedes borrar mensajes directamente del canal de Discord con el botón × de cada fila.</div>
+    </div>
+  </div>
+
+  <div class="note"><b>Cola:</b> si hay varios eventos seguidos se encolan y procesan uno por uno. Verás <span class="mono">(+N en cola)</span> junto al nombre del evento actual.</div>
+
+  <!-- MARCADOR -->
+  <div class="chapter">
+    <span class="chapter-num">03</span>
+    <span class="chapter-title">Pestañas</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">🏟️</div>
+    <div class="sec-title">Marcador <small>PESTAÑA 1</small></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Controles centrales</div>
+    <p>Entre los dos marcadores hay un indicador de período <span class="pill">1T</span> <span class="pill">2T</span> que se actualiza automáticamente, y un botón <span class="acc">⇄</span> para hacer swap de equipos. También puedes hacer swap con el <span class="acc">click del botón central del ratón</span> sobre la zona del marcador.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🟢</div>
+      <div class="row-item-body">
+        <div class="row-item-title">INICIAR</div>
+        <div class="row-item-desc">Registra la hora de inicio y envía el webhook de inicio. El botón cambia a <span class="acc">EN JUEGO</span> y luego a <span class="acc">REANUDAR</span> al finalizar.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⏸</div>
+      <div class="row-item-body">
+        <div class="row-item-title">⏸ ½T — Inicio de medio tiempo</div>
+        <div class="row-item-desc">Pide confirmación. Al aceptar, los equipos se rotan automáticamente (swap) y se envía el mensaje a Discord. Solo funciona si el partido ya fue iniciado.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">▶️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">▶ ½T — Fin de medio tiempo</div>
+        <div class="row-item-desc">Envía el mensaje de fin de ½T a Discord. No rota los equipos.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🏁</div>
+      <div class="row-item-body">
+        <div class="row-item-title">🏁 FIN</div>
+        <div class="row-item-desc">Pide confirmación mostrando el marcador. Al aceptar, guarda el partido en el historial y envía el resumen final a Discord (con tarjetas si las hay). Aparece el botón <span class="acc">↺</span> para reenviar el resultado si es necesario.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Barra de estado — tiempo</div>
+    <p>
+      <span class="muted mono">ESPERANDO INICIO…</span> — antes de iniciar<br>
+      <span class="muted mono">INICIO: HH:MM (Jugando…)</span> — durante el partido<br>
+      <span class="muted mono">INICIO: HH:MM — FIN: HH:MM</span> — finalizado
+    </p>
+  </div>
+
+  <div class="note"><b>Auto-guardado:</b> HaxRef guarda automáticamente en cada cambio relevante (gol, tarjeta, inicio). También guarda si cierras o recargas la página accidentalmente.</div>
+
+  <!-- SANCIONES -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">🟨</div>
+    <div class="sec-title">Sanciones <small>PESTAÑA 2</small></div>
+  </div>
+
+  <div class="card">
+    <p>Registra <span class="acc-gold">tarjetas amarillas</span> y <span class="acc-red">tarjetas rojas</span> por equipo. Al presionar cualquier botón se abre un modal con campo de nombre del jugador (obligatorio) y motivo (opcional).</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">💡</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Chips de sugerencias</div>
+        <div class="row-item-desc">Los jugadores ya registrados aparecen como chips. Los <span class="acc-gold">chips con borde amarillo</span> indican que ese jugador ya tiene una TA. Hacer click autocompleta el nombre.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🔁</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Doble amarilla automática</div>
+        <div class="row-item-desc">Si un jugador ya tiene TA y le das otra, HaxRef la convierte automáticamente en TR marcándola como <span class="pill gold">(2TA)</span> tanto en la lista como en el mensaje de Discord.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">📌</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Datos mostrados en cada tarjeta</div>
+        <div class="row-item-desc">Ícono de tipo · Nombre del jugador · Período <span class="pill">[1T]</span> <span class="pill">[2T]</span> · Indicador <span class="pill gold">(2TA)</span> si aplica · Motivo si fue ingresado.</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Si eliminas una TA de un jugador que tiene una TR por doble amarilla, el indicador (2TA) se limpia automáticamente de la TR correspondiente. Confirma con <kbd>Enter</kbd> en el modal.</div>
+
+  <!-- DISCORD TAB -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon" style="font-size:15px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#5865f2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.03.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    </div>
+    <div class="sec-title">Discord <small>PESTAÑA 3</small></div>
+  </div>
+
+  <div class="card">
+    <p>Gestiona la conexión con tu canal. El punto indicador en la NavBar se enciende en <span class="acc-dc">azul</span> cuando hay conexión activa. Al desconectar se limpia la sesión pero el webhook sigue guardado para la próxima vez.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Eventos enviados automáticamente</div>
+    <div class="events-row">
+      <span class="pill dc">🟢 Inicio</span>
+      <span class="pill dc">⏸ Inicio ½T</span>
+      <span class="pill dc">▶ Fin ½T</span>
+      <span class="pill dc">⚽ Gol</span>
+      <span class="pill dc">🟨 TA</span>
+      <span class="pill dc">🟥 TR</span>
+      <span class="pill dc">🏁 Final</span>
+    </div>
+    <p class="muted" style="font-size:12px; padding: 0 2px">Todos con delay de 10 s cancelable. El resumen de 🏁 incluye hora de inicio/fin y detalle de tarjetas.</p>
+  </div>
+
+  <div class="note"><b>Gol especial:</b> primero se envía un embed solo con "⚽" y ~1.2 s después se edita con el marcador completo — efecto de reveal.</div>
+
+  <!-- MENSAJES -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">✏️</div>
+    <div class="sec-title">Mensajes <small>PESTAÑA 4</small></div>
+  </div>
+
+  <div class="card">
+    <p>Personaliza el título y color de cada embed. Máximo <span class="acc">120 caracteres</span> por título. Usa <span class="acc">GUARDAR</span> para persistir los cambios localmente y <span class="acc">TEST</span> para previsualizar en Discord (requiere webhook conectado, se borra en 15 s).</p>
+    <p style="margin-top:10px">Al hacer click en un chip de variable se copia al portapapeles — el chip se pone <span style="color:#4caf50;font-weight:700">verde</span> brevemente para confirmarlo.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Variables disponibles</div>
+
+    <div class="vars-block">
+      <div class="vars-event">Inicio</div>
+      <span class="pill">{teamred}</span><span class="pill">{teamblue}</span>
+    </div>
+    <div class="vars-block">
+      <div class="vars-event">Inicio ½T · Fin ½T</div>
+      <span class="pill">{teamred}</span><span class="pill">{teamblue}</span><span class="pill">{scorered}</span><span class="pill">{scoreblue}</span>
+    </div>
+    <div class="vars-block">
+      <div class="vars-event">Gol</div>
+      <span class="pill">{team}</span><span class="pill">{teamred}</span><span class="pill">{teamblue}</span><span class="pill">{scorered}</span><span class="pill">{scoreblue}</span><span class="pill">{hora}</span>
+    </div>
+    <div class="vars-block">
+      <div class="vars-event">Tarjeta (TA / TR)</div>
+      <span class="pill">{player}</span><span class="pill">{team}</span><span class="pill">{reason}</span>
+    </div>
+    <div class="vars-block">
+      <div class="vars-event">Final</div>
+      <span class="pill">{teamred}</span><span class="pill">{teamblue}</span><span class="pill">{scorered}</span><span class="pill">{scoreblue}</span><span class="pill">{timestart}</span><span class="pill">{timeend}</span>
+    </div>
+  </div>
+
+  <div class="note"><b>Nota sobre el swap:</b> <span class="mono">{teamred}</span>, <span class="mono">{teamblue}</span>, <span class="mono">{scorered}</span> y <span class="mono">{scoreblue}</span> siempre reflejan los nombres y marcadores originales, independientemente de rotaciones de medio tiempo. <span class="mono">{team}</span> en Gol es el equipo que anotó (también original).</div>
+
+  <!-- EXPORTAR -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">💾</div>
+    <div class="sec-title">Exportar / Importar <small>PESTAÑA 5</small></div>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">☑️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">☑ TODO</div>
+        <div class="row-item-desc">Selecciona o deselecciona todos los partidos de la lista de una vez.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⬆️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">IMPORTAR</div>
+        <div class="row-item-desc">Carga un <span class="mono">.txt</span> exportado previamente. HaxRef detecta los partidos, pide confirmación y los agrega sin duplicar (compara por ID).</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⬇️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">EXPORTAR .TXT</div>
+        <div class="row-item-desc">Descarga los partidos seleccionados. El archivo incluye: nombres de equipos, marcador final, nombres y marcadores originales (pre-swap), hora de inicio/fin y fecha de guardado.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SHORTCUTS ── -->
+  <div class="chapter">
+    <span class="chapter-num">04</span>
+    <span class="chapter-title">Shortcuts</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">⌨️</div>
+    <div class="sec-title">Atajos de teclado y ratón</div>
+  </div>
+
+  <div class="card">
+    <div class="shortcut-grid">
+
+      <div class="shortcut-keys"><kbd>Ctrl</kbd><span>+</span><kbd>.</kbd></div>
+      <div class="shortcut-desc"><span class="acc-blue">Gol equipo azul</span> <span class="muted">(ventana de 1 s tras pulsar Ctrl)</span></div>
+
+      <div class="shortcut-keys"><kbd>Ctrl</kbd><span>+</span><kbd>-</kbd></div>
+      <div class="shortcut-desc"><span class="acc-red">Gol equipo rojo</span> <span class="muted">(ventana de 1 s tras pulsar Ctrl)</span></div>
+
+      <div class="shortcut-sep"></div>
+
+      <div class="shortcut-keys"><kbd>1</kbd></div>
+      <div class="shortcut-desc">Ir a Marcador</div>
+
+      <div class="shortcut-keys"><kbd>2</kbd></div>
+      <div class="shortcut-desc">Ir a Sanciones</div>
+
+      <div class="shortcut-keys"><kbd>3</kbd></div>
+      <div class="shortcut-desc">Ir a Discord</div>
+
+      <div class="shortcut-keys"><kbd>4</kbd></div>
+      <div class="shortcut-desc">Ir a Mensajes</div>
+
+      <div class="shortcut-keys"><kbd>5</kbd></div>
+      <div class="shortcut-desc">Ir a Exportar</div>
+
+      <div class="shortcut-sep"></div>
+
+      <div class="shortcut-keys" style="font-size:13px;color:#5a3a8a">🖱️ Botón central</div>
+      <div class="shortcut-desc">Swap de equipos (sobre la zona del marcador)</div>
+
+      <div class="shortcut-keys"><kbd>Enter</kbd></div>
+      <div class="shortcut-desc">Confirmar en modales de jugador / motivo</div>
+
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> los atajos de número <kbd>1</kbd>–<kbd>5</kbd> solo funcionan cuando no hay ningún modal abierto.</div>
+
+  <!-- MISC -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">⏻</div>
+    <div class="sec-title">Botón salir</div>
+  </div>
+
+  <div class="card">
+    <p>El botón <span class="acc">⏻</span> al extremo derecho de la NavBar recarga la página y vuelve al launcher. El partido se auto-guarda antes de salir si tiene goles, tarjetas u hora de inicio registrada.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-title">HaxRef Pro 2.0</div>
+  <div class="ft-by">by tutanka</div>
+</footer>
+
+</body>
+</html>

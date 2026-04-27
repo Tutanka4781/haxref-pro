@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>HaxRef Pro</title>
+    <style>
+        :root { --red: #ff4747; --blue: #4799ff; --bg: #000; --panel: #111; --border: #222; --accent: #00ff88; }
+        body { background-color: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; flex-direction: column; user-select: none; }
+        
+        /* LAUNCHER */
+        #launcher { position: fixed; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
+        .logo { font-size: 11px; color: var(--accent); text-align: center; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
+        .btn-main { padding: 10px; border: 1px solid var(--border); background: var(--panel); color: #fff; cursor: pointer; font-size: 11px; border-radius: 4px; margin-bottom: 8px; text-align: center; font-weight: bold; }
+        .btn-main:hover { border-color: var(--accent); color: var(--accent); }
+        #match-list { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); padding-top: 10px; }
+        .match-item { font-size: 10px; padding: 8px; border-bottom: 1px solid #111; cursor: pointer; display: flex; justify-content: space-between; color: #888; }
+
+        /* APP PRINCIPAL */
+        #main-app { display: none; flex-direction: column; height: 100%; width: 100%; }
+        header { background: #080808; padding: 4px 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 22px; }
+        #session-title { font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; }
+        #time-indicator { font-size: 11px; color: var(--accent); font-weight: 900; background: #1a1a1a; padding: 1px 5px; border-radius: 2px; }
+
+        nav { display: flex; background: #080808; border-bottom: 1px solid var(--border); height: 28px; }
+        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; color: #444; transition: 0.2s; }
+        .nav-btn.active { background: var(--panel); color: var(--accent); }
+
+        /* CONTENIDO */
+        .content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
+        .section { display: none; flex-direction: column; height: 100%; width: 100%; }
+        .section.active { display: flex; }
+
+        /* MARCADOR CON GLOW */
+        .score-container { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .score { font-size: 25vw; font-weight: 900; cursor: pointer; line-height: 1; flex: 1; text-align: center; transition: all 0.4s ease; }
+        #l-score { color: var(--red); text-shadow: 0 0 25px rgba(255, 71, 71, 0.4); }
+        #r-score { color: var(--blue); text-shadow: 0 0 25px rgba(71, 153, 255, 0.4); }
+        
+        /* INPUTS AJUSTADOS */
+        .label { font-size: 9px; color: #444; margin-bottom: 4px; font-weight: bold; letter-spacing: 0.5px; }
+        .input-box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; padding: 8px; font-size: 13px; color: #ccc; outline: none; flex: 1; overflow-y: auto; line-height: 1.4; }
+        .input-box:focus { border-color: #333; background: #151515; }
+        .row-flex { display: flex; gap: 10px; flex: 1; min-height: 0; }
+        .col-flex { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    </style>
+</head>
+<body>
+
+    <div id="launcher">
+        <div class="logo">HAXREF PRO</div>
+        <div class="btn-main" onclick="createNew()">+ NUEVO PARTIDO</div>
+        <div id="match-list"></div>
+    </div>
+
+    <div id="main-app">
+        <header>
+            <div id="session-title">---</div>
+            <div id="time-indicator">1T</div>
+        </header>
+        <nav>
+            <div class="nav-btn active" onclick="tab('sec-score', this)">CONTADOR</div>
+            <div class="nav-btn" onclick="tab('sec-ref', this)">ARB</div>
+            <div class="nav-btn" onclick="tab('sec-notes', this)">NOTAS</div>
+            <div class="nav-btn" style="color:#600" onclick="location.reload()">X</div>
+        </nav>
+        <div class="content">
+            <div id="sec-score" class="section active">
+                <div class="score-container">
+                    <div id="l-score" class="score">0</div>
+                    <div id="r-score" class="score">0</div>
+                </div>
+            </div>
+            <div id="sec-ref" class="section" style="gap: 10px;">
+                <div class="col-flex" style="flex: 0.45;">
+                    <div class="label">RQ / INCIDENCIAS</div>
+                    <div id="box-rq" class="input-box" contenteditable="true" spellcheck="false"></div>
+                </div>
+                <div class="row-flex">
+                    <div class="col-flex">
+                        <div id="lbl-l" class="label">A/R RED</div>
+                        <div id="box-red" class="input-box" contenteditable="true" spellcheck="false"></div>
+                    </div>
+                    <div class="col-flex">
+                        <div id="lbl-r" class="label">A/R BLUE</div>
+                        <div id="box-blue" class="input-box" contenteditable="true" spellcheck="false"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="sec-notes" class="section">
+                <div class="label">NOTAS ADICIONALES</div>
+                <div id="box-notes" class="input-box" contenteditable="true" spellcheck="false"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let currentId = null; let data = {};
+    const sessions = () => JSON.parse(localStorage.getItem('haxSessions') || '{}');
+
+    function loadList() {
+        const list = document.getElementById('match-list'); list.innerHTML = '';
+        Object.keys(sessions()).forEach(id => {
+            const item = document.createElement('div'); item.className = 'match-item';
+            item.innerHTML = `<span>${id.toUpperCase()}</span><span style="color:#500;font-size:14px;font-weight:bold" onclick="deleteMatch(event,'${id}')">×</span>`;
+            item.onclick = () => loadMatch(id); list.appendChild(item);
+        });
+    }
+
+    function createNew() {
+        const name = prompt("Nombre del partido:"); if (!name) return;
+        currentId = name; data = { sL:0, sR:0, rq:"", red:"", blue:"", notes:"", swapped:false, time:1 };
+        save(); launch();
+    }
+
+    function loadMatch(id) { currentId = id; data = sessions()[id]; launch(); }
+
+    function deleteMatch(e, id) {
+        e.stopPropagation(); if(!confirm(`¿Borrar sesión "${id}"?`)) return;
+        const s = sessions(); delete s[id]; localStorage.setItem('haxSessions', JSON.stringify(s)); loadList();
+    }
+
+    function launch() {
+        document.getElementById('launcher').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        document.getElementById('session-title').innerText = currentId;
+        render();
+    }
+
+    function save() {
+        const s = sessions();
+        data.rq = document.getElementById('box-rq').innerText;
+        data.red = document.getElementById('box-red').innerText;
+        data.blue = document.getElementById('box-blue').innerText;
+        data.notes = document.getElementById('box-notes').innerText;
+        s[currentId] = data; localStorage.setItem('haxSessions', JSON.stringify(s));
+    }
+
+    function render() {
+        const elL = document.getElementById('l-score'), elR = document.getElementById('r-score');
+        elL.innerText = data.sL; elR.innerText = data.sR;
+        document.getElementById('box-rq').innerText = data.rq || "";
+        document.getElementById('box-red').innerText = data.red || "";
+        document.getElementById('box-blue').innerText = data.blue || "";
+        document.getElementById('box-notes').innerText = data.notes || "";
+        document.getElementById('time-indicator').innerText = data.time + "T";
+        
+        if(data.swapped) {
+            elL.style.color = "var(--blue)"; elL.style.textShadow = "0 0 25px rgba(71, 153, 255, 0.4)";
+            elR.style.color = "var(--red)"; elR.style.textShadow = "0 0 25px rgba(255, 71, 71, 0.4)";
+            document.getElementById('lbl-l').innerText = "A/R BLUE"; document.getElementById('lbl-r').innerText = "A/R RED";
+        } else {
+            elL.style.color = "var(--red)"; elL.style.textShadow = "0 0 25px rgba(255, 71, 71, 0.4)";
+            elR.style.color = "var(--blue)"; elR.style.textShadow = "0 0 25px rgba(71, 153, 255, 0.4)";
+            document.getElementById('lbl-l').innerText = "A/R RED"; document.getElementById('lbl-r').innerText = "A/R BLUE";
+        }
+    }
+
+    function tab(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = 'flex'; btn.classList.add('active');
+    }
+
+    function score(side, btn) {
+        if(btn===0) data[side]++; if(btn===2 && data[side]>0) data[side]--;
+        render(); save();
+    }
+
+    document.getElementById('l-score').onmousedown = (e) => score('sL', e.button);
+    document.getElementById('r-score').onmousedown = (e) => score('sR', e.button);
+    
+    window.onmousedown = (e) => { 
+        if(e.button===1) { 
+            e.preventDefault(); data.swapped = !data.swapped; 
+            data.time = (data.time === 1) ? 2 : 1;
+            let t = data.sL; data.sL = data.sR; data.sR = t; render(); save(); 
+        } 
+    };
+    
+    document.querySelectorAll('.input-box').forEach(b => b.oninput = save);
+    window.oncontextmenu = (e) => { if(e.target.className === 'score') e.preventDefault(); };
+    loadList();
+</script>
+</body>
+</html>

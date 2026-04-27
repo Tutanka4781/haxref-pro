@@ -1,0 +1,53 @@
+### HaxRef Pro v2.0!
+
+¡Es oficial, la 2.0 ha llegado! Con ella, la integración de los wwebhooks de discord.
+
+##| CHANGELOG
+
+# Webhooks:
+Ahora, puedes usar la nueva función de webhooks, básicamente es un sistema que automatiza el enviado de eventos a Discord.
+Este es el cambio insignia en esta 2.0, para saber cómo se utiliza, lee la guía de uso en el zip de la release.
+
+# Mensajes Personalizables:
+Aunado a los webhooks, he implementado una serie de lógicas para permitir editar los mensajes que se envían a discord.
+Podrás encontrar esto en la pestaña "Mensajes" en la NavBar. Para más info, lee la guía.
+
+# WebhookDelay / WebhookDel:
+He integrado un countdown de 10 segundos al ejecutar un evento, puedes cancelar y enviar al instante en la barra de countdown, ubicada arriba de la NavBar.
+También he agregado un historial de los webhooks, con capacidad de eliminar mensajes anteriores con un click.
+Función experimental, puede no ser precisa. Más info en la guía.
+
+# Exporte / Importe:
+Se ha agregado una sección entera para exportar e importar los datos que desees, puedes seleccionar qué exportar y pronto qué importar.
+Podrás encontrar esto en la pestaña "Exporte" en la NavBar. Para más info, lee la guía.
+
+# Controles de tiempo:
+Se han añadido funciones de control de tiempo en los partidos, inicio, inicio del medio tiempo, inicio del 2t y final que disparan diferentes webhooks.
+También son personalizables desde la pestaña "Mensajes" en la NavBar. Más info en la guía.
+
+<-----+----->
+
+#Extra:
+Se han añadido y corregido detalles en la IU.
+Se ha cambiado el menú principal y el Background.
+Se han mejorado y corregido lógicas con fallos.
+Estabilización de los webhooks, bugs menores.
+
+
+# Eliminación de funciones:
+Se ha eliminado por completo el CHANGELOG dentro de la IU. 
+Se ha eliminado la sección "Reportes", sustituida por el webhook de final de partido.
+Se han eliminado los efectos innecesarios.
+
+
+*HaxRef Pro by Tutanka*
+Redes Oficiales:
+Youtube: youtube.com/tutanka4781
+Discord: tutanka4781
+
+- **MIT License | Uso y distribución aprobado por el autor**.
+
+
+
+
+

@@ -1,0 +1,28 @@
+estos son los futuros cambios que quiero que me ayudes a hacer, la 2.1.0
+
+-------[GENERAL]
+
+[MODO SIN WEBHOOK] Añadir un botón al menú de detección de webhooks: "iniciar sin webhook" lo que hace es seguir guardando el webhook pero no usarlo (la pestaña webhook y "mensajes" no son seleccionables ni hay countdown ni nada relacionado a los webhooks) 
+[MENÚ] Al entrar y verificar el webhook, que siempre aparezca la casilla seleccionable "Iniciar con webhook desactivado" (obvio, que funcione xd).
+[FUNCION] Añadir el campo de razón a las faltas, que se pueda editar luego de haber disparado el webhook y que se edite el mensaje también.
+[FUNCIONALIDAD] Poner un botón siempre visible que reemplaze al botón de historial de webhooks en la countdown bar, de preferencia abajo de los botones de control de tiempo.
+[EXTRA] Añadir un botón de ajustes con un engranaje, sugiere qué ajustes podríamos implementar en la siguiente release.
+[ESTADO WBHK] Añadir un ping o algo de ese estilo para indicar el estado del webhook de verdad, que incluso sin conexión dice "conectado" (puedes sugerir)
+[CRÍTICO] Cuando se añada y se reste un gol ¿Qué debería pasar? se elimina el webhook si es que se había mandado antes, o se pregunta si borrar el webhook ???
+(sugiere una solución para eso)
+[ERRORES] Añadir pop-ups de errores si se llegan a presentar por ejemplo al disparar cualquier webhook o testearlos (por si no se conecta o cosas de ese estilo).
+
+-------[BUGS]
+
+[WBHKS] Los mensajes de los webhooks si no se modifican pueden tener cosas repetidas, como las tarjetas que tienen doble indicación de equipo.
+[CRÍTICO] Los jugadores con tarjetas no siguen a su equipo luego del swap de los equipos.
+[MENSAJES-WEBHOOKS] Eliminar los shortcuts de teclado en la sección mensajes mientras se escribe.
+
+-------[VISUAL]
+[IU] actualiza la iu de la sección "discord" (elimina el texto "discord webhook" y "enlace en tiempo real", pon el logo de dc en el centro con su glow).
+[EMBEDS] Añade la función de cambiar de color los embeds de dc (dime cuál sería la manera más eficiente)
+[TEXTO] porfa haz el texto más grande (en base al tamaño de la ventana) para que sea legible siempre (por favor, no exageres)
+
+Antes de hacer nada respóndeme.
+
+

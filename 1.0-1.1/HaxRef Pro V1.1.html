@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>HaxRef Pro V1.1</title>
+    <style>
+        :root {
+            --red: #ff4747; --blue: #4799ff; --bg: #0a0a0a; --panel: #151515;
+            --border: #2a2a2a; --accent: #00ff88; --yellow: #ffd700;
+            --glow-red: 0 0 30px rgba(255, 71, 71, 0.4);
+            --glow-blue: 0 0 30px rgba(71, 153, 255, 0.4);
+        }
+
+        body {
+            background-color: var(--bg); color: #eee; font-family: 'Segoe UI', sans-serif;
+            margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; user-select: none;
+        }
+
+        /* MODO MINI */
+        #mini-btn {
+            display: none; position: fixed; inset: 0; 
+            background: var(--accent); color: #000;
+            cursor: move; align-items: center; justify-content: center; 
+            font-size: 30px; border-radius: 50%; -webkit-app-region: drag; 
+            opacity: 0.6; transition: 0.2s; z-index: 9999;
+        }
+        #mini-btn:hover { opacity: 1; }
+
+        /* MODAL */
+        #modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .modal-card {
+            background: var(--panel); border: 1px solid var(--border); padding: 25px;
+            border-radius: 12px; width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .modal-card input {
+            width: 100%; background: #000; border: 1px solid var(--border);
+            padding: 12px; color: #fff; border-radius: 6px; margin: 15px 0; box-sizing: border-box; outline: none;
+        }
+
+        /* MENÚ PRINCIPAL */
+        #launcher { 
+            position: fixed; inset: 0; background: #000; z-index: 100; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; 
+        }
+        .welcome { text-align: center; color: var(--accent); font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+        .by-line { color: #444; font-size: 12px; margin-bottom: 40px; letter-spacing: 2px; font-weight: bold; }
+        .menu-container { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 350px; }
+        
+        #history-panel { 
+            display: none; position: fixed; inset: 0; background: #000; z-index: 110; 
+            flex-direction: column; padding: 25px; 
+        }
+        #match-list { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); margin-top: 15px; }
+        .match-item { padding: 15px; border-bottom: 1px solid #111; display: flex; justify-content: space-between; cursor: pointer; }
+        .match-item:hover { background: #080808; color: var(--accent); }
+
+        .btn-main { 
+            padding: 18px; border: 1px solid var(--border); background: var(--panel); 
+            color: #fff; cursor: pointer; font-size: 14px; border-radius: 10px; 
+            text-align: center; font-weight: bold; transition: 0.3s; 
+        }
+        .btn-main:hover { border-color: var(--accent); transform: translateY(-2px); background: #1a1a1a; }
+        .btn-history { border-color: #333; color: #888; }
+
+        /* APP */
+        #main-app { display: none; flex-direction: column; height: 100%; width: 100%; }
+        header { background: #000; padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        #time-status { font-size: 13px; color: var(--accent); font-weight: 800; background: rgba(0,255,136,0.1); padding: 4px 15px; border-radius: 20px; }
+
+        nav { display: flex; background: #111; border-bottom: 1px solid var(--border); height: 55px; padding: 0 10px; align-items: center; gap: 8px; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #666; cursor: pointer; height: 45px; border-radius: 8px; font-weight: bold; }
+        .nav-btn.active { background: var(--panel); color: var(--accent); border: 1px solid var(--border); }
+        .exit-btn { flex: 0 0 45px; color: #ff4747; background: rgba(255, 71, 71, 0.05); font-size: 18px; }
+
+        .content { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
+        .section { display: none; flex-direction: column; height: 100%; gap: 15px; }
+        .section.active { display: flex; }
+
+        /* MARCADOR */
+        .score-container { flex: 1; display: flex; align-items: center; justify-content: center; gap: 40px; }
+        .score-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .score-team-name { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: -15px; }
+        .score { font-size: 28vh; font-weight: 900; cursor: pointer; transition: 0.3s; }
+
+        /* SANCIONES */
+        .row-flex { display: flex; gap: 15px; flex: 1; min-height: 0; }
+        .col-flex { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+        .label { font-size: 10px; color: #555; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .input-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 13px; color: #ccc; flex: 1; overflow-y: auto; }
+        
+        .time-divider {
+            width: 100%; text-align: center; border-bottom: 1px solid #333; 
+            line-height: 0.1em; margin: 25px 0 15px; font-size: 9px; 
+            color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .time-divider span { background: var(--panel); padding: 0 10px; }
+
+        .card-btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .card-btn { flex: 1; padding: 15px; border: none; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 11px; }
+        .card-item { display: flex; justify-content: space-between; background: #1a1a1a; padding: 10px; margin-bottom: 6px; border-radius: 6px; font-size: 12px; border-left: 4px solid transparent; }
+        .delete-x { color: var(--red); cursor: pointer; font-weight: bold; padding: 0 5px; }
+
+        /* REPORTE */
+        #box-notes { 
+            background: #050505; color: var(--accent); font-family: 'Consolas', monospace; 
+            border: 1px solid var(--border); border-radius: 8px; padding: 15px; 
+            font-size: 13px; flex: 1; overflow-y: auto; white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mini-btn" onclick="expandApp()">⚽</div>
+
+    <div id="modal-overlay">
+        <div class="modal-card">
+            <div id="modal-label" class="label" style="color: var(--accent)">DATO</div>
+            <input type="text" id="modal-input" autocomplete="off">
+            <button class="btn-main" style="width: 100%; border-color: var(--accent)" onclick="confirmModal()">ACEPTAR</button>
+        </div>
+    </div>
+
+    <!-- MENÚ PRINCIPAL -->
+    <div id="launcher">
+        <div class="welcome">¡Bienvenido a HaxRef v1.1!</div>
+        <div class="by-line">BY TUTANKA</div>
+        <div class="menu-container">
+            <div class="btn-main" onclick="openNewMatchModal()">+ NUEVO PARTIDO</div>
+            <div class="btn-main btn-history" onclick="toggleHistory(true)">📜 ACCEDER A PARTIDAS</div>
+        </div>
+    </div>
+
+    <!-- PANEL HISTORIAL -->
+    <div id="history-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="label" style="font-size:14px; color:var(--accent)">PARTIDAS GUARDADAS</div>
+            <div class="delete-x" style="font-size:24px" onclick="toggleHistory(false)">✕</div>
+        </div>
+        <div id="match-list"></div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="main-app">
+        <header>
+            <div id="session-title" style="font-size: 10px; color: #444">---</div>
+            <div id="time-status">1T</div>
+            <div style="flex:1"></div>
+        </header>
+
+        <nav>
+            <div class="nav-btn active" onclick="tab('sec-score', this)"><span>⚽</span>GOLES</div>
+            <div class="nav-btn" onclick="tab('sec-ref', this)"><span>🎴</span>SANCIONES</div>
+            <div class="nav-btn" onclick="tab('sec-notes', this)"><span>📝</span>REPORTE</div>
+            <div class="nav-btn" style="color:var(--yellow)" onclick="contractApp()"><span>➖</span>MINI</div>
+            <div class="nav-btn exit-btn" onclick="location.reload()">✕</div>
+        </nav>
+
+        <div class="content">
+            <div id="sec-score" class="section active">
+                <div class="score-container">
+                    <div class="score-wrapper">
+                        <div id="score-name-l" class="score-team-name">LOCAL</div>
+                        <div id="l-score" class="score" onmousedown="score('sL', event.button)">0</div>
+                    </div>
+                    <div class="swap-mid" onclick="rotateTeams()" style="font-size: 40px; cursor: pointer; color: #222; padding: 20px;">⇄</div>
+                    <div class="score-wrapper">
+                        <div id="score-name-r" class="score-team-name">VISITANTE</div>
+                        <div id="r-score" class="score" onmousedown="score('sR', event.button)">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-ref" class="section">
+                <div class="row-flex">
+                    <div class="col-flex">
+                        <div id="lbl-l" class="label">EQUIPO 1</div>
+                        <div id="box-cards-red" class="input-box"></div>
+                        <div class="card-btn-row">
+                            <button class="card-btn" style="background:var(--yellow); color:#000" onclick="prepCard('RED', '🟨')">AMARILLA</button>
+                            <button class="card-btn" style="background:var(--red); color:#fff" onclick="prepCard('RED', '🟥')">ROJA</button>
+                        </div>
+                    </div>
+                    <div class="col-flex">
+                        <div id="lbl-r" class="label">EQUIPO 2</div>
+                        <div id="box-cards-blue" class="input-box"></div>
+                        <div class="card-btn-row">
+                            <button class="card-btn" style="background:var(--yellow); color:#000" onclick="prepCard('BLUE', '🟨')">AMARILLA</button>
+                            <button class="card-btn" style="background:var(--red); color:#fff" onclick="prepCard('BLUE', '🟥')">ROJA</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-notes" class="section">
+                <div class="label">Log e Informe Final</div>
+                <div id="box-notes"></div>
+                <button class="btn-main" style="margin-top:10px; border-color:var(--accent); color:var(--accent)" onclick="copyReport()">COPIAR REPORTE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentId = null; let data = {}; let modalAction = null;
+        const sessions = () => JSON.parse(localStorage.getItem('haxSessions') || '{}');
+
+        function toggleHistory(show) {
+            document.getElementById('history-panel').style.display = show ? 'flex' : 'none';
+            if(show) loadList();
+        }
+
+        function logEvent(msg) {
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            data.log = `[${time}] ${msg}\n` + (data.log || "");
+            render(); save();
+        }
+
+        function contractApp() {
+            document.getElementById('launcher').style.display = 'none';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('history-panel').style.display = 'none';
+            document.getElementById('mini-btn').style.display = 'flex';
+            if(window.pywebview) pywebview.api.toggle_size('mini');
+        }
+
+        function expandApp() {
+            document.getElementById('mini-btn').style.display = 'none';
+            if(currentId) document.getElementById('main-app').style.display = 'flex';
+            else document.getElementById('launcher').style.display = 'flex';
+            if(window.pywebview) pywebview.api.toggle_size('full');
+        }
+
+        function openModal(label, callback) {
+            document.getElementById('modal-label').innerText = label;
+            document.getElementById('modal-input').value = "";
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-input').focus();
+            modalAction = callback;
+        }
+
+        function confirmModal() {
+            const val = document.getElementById('modal-input').value;
+            if(val && modalAction) modalAction(val);
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function openNewMatchModal() {
+            openModal("EQUIPO LOCAL (RED)", (t1) => {
+                setTimeout(() => {
+                    openModal("EQUIPO VISITANTE (BLUE)", (t2) => {
+                        currentId = t1 + " vs " + t2;
+                        data = { t1, t2, sL:0, sR:0, cardsRed:[], cardsBlue:[], log:"", swapped:false, time:1 };
+                        logEvent("PARTIDO INICIADO");
+                        save(); launch();
+                    });
+                }, 100);
+            });
+        }
+
+        function prepCard(btnKey, icono) {
+            const sideIsRed = (btnKey === 'RED');
+            const team = sideIsRed ? (data.swapped ? data.t2 : data.t1) : (data.swapped ? data.t1 : data.t2);
+            openModal("JUGADOR DE " + team.toUpperCase(), (jugador) => {
+                const arr = sideIsRed ? data.cardsRed : data.cardsBlue;
+                arr.push({icono, jug: jugador, time: data.time});
+                logEvent(`${icono} ${jugador} (${team})`);
+                render(); save();
+            });
+        }
+
+        function launch() {
+            document.getElementById('launcher').style.display = 'none';
+            document.getElementById('history-panel').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            document.getElementById('session-title').innerText = currentId;
+            render();
+        }
+
+        function save() {
+            const s = sessions();
+            if(currentId) { s[currentId] = data; localStorage.setItem('haxSessions', JSON.stringify(s)); }
+        }
+
+        function rotateTeams() {
+            data.time = (data.time === 1) ? 2 : 1;
+            data.swapped = !data.swapped;
+            let temp = data.sL; data.sL = data.sR; data.sR = temp;
+            logEvent(`CAMBIO DE LADO -> ${data.time}T`);
+            render(); save();
+        }
+
+        function score(side, btn) {
+            const isRed = (side === 'sL' && !data.swapped) || (side === 'sR' && data.swapped);
+            const team = isRed ? data.t1 : data.t2;
+            if(btn === 0) { data[side]++; logEvent(`GOL DE ${team}`); }
+            if(btn === 2 && data[side] > 0) { data[side]--; logEvent(`GOL ANULADO (${team})`); }
+            render(); save();
+        }
+
+        function removeCard(isRed, idx) {
+            const arr = isRed ? data.cardsRed : data.cardsBlue;
+            arr.splice(idx, 1);
+            logEvent("SANCIÓN ELIMINADA");
+            render(); save();
+        }
+
+        function render() {
+            const elL = document.getElementById('l-score'), elR = document.getElementById('r-score');
+            const nL = document.getElementById('score-name-l'), nR = document.getElementById('score-name-r');
+            const lblL = document.getElementById('lbl-l'), lblR = document.getElementById('lbl-r');
+
+            elL.innerText = data.sL; elR.innerText = data.sR;
+            document.getElementById('time-status').innerText = data.time + "T";
+
+            if(!data.swapped) {
+                nL.innerText = data.t1; nR.innerText = data.t2;
+                nL.style.color = elL.style.color = "var(--red)"; nR.style.color = elR.style.color = "var(--blue)";
+                elL.style.textShadow = "var(--glow-red)"; elR.style.textShadow = "var(--glow-blue)";
+                lblL.innerText = data.t1; lblR.innerText = data.t2;
+            } else {
+                nL.innerText = data.t2; nR.innerText = data.t1;
+                nL.style.color = elL.style.color = "var(--blue)"; nR.style.color = elR.style.color = "var(--red)";
+                elL.style.textShadow = "var(--glow-blue)"; elR.style.textShadow = "var(--glow-red)";
+                lblL.innerText = data.t2; lblR.innerText = data.t1;
+            }
+
+            const draw = (arr, elId, isRed) => {
+                const el = document.getElementById(elId); el.innerHTML = '';
+                // Clonar y ordenar por tiempo (1 antes que 2)
+                const sorted = [...arr].sort((a,b) => a.time - b.time);
+                let has2THeader = false;
+                
+                sorted.forEach((c, i) => {
+                    if (c.time === 2 && !has2THeader) {
+                        const div = document.createElement('div');
+                        div.className = 'time-divider';
+                        div.innerHTML = '<span>SEGUNDO TIEMPO</span>';
+                        el.appendChild(div);
+                        has2THeader = true;
+                    }
+                    const d = document.createElement('div');
+                    d.className = 'card-item'; d.style.borderLeftColor = c.icono === '🟨' ? 'var(--yellow)' : 'var(--red)';
+                    d.innerHTML = `<span>${c.icono} ${c.jug}</span><span class="delete-x" onclick="removeCard(${isRed},${i})">×</span>`;
+                    el.appendChild(d);
+                });
+            };
+            draw(data.cardsRed, 'box-cards-red', true); draw(data.cardsBlue, 'box-cards-blue', false);
+
+            const t1Res = data.swapped ? data.sR : data.sL, t2Res = data.swapped ? data.sL : data.sR;
+            let res = `🏆 REPORTE: ${data.t1} ${t1Res} - ${t2Res} ${data.t2}\n\n`;
+            res += `🎴 SANCIONES:\n`;
+            const allCards = [...data.cardsRed, ...data.cardsBlue].sort((a,b) => a.time - b.time);
+            allCards.forEach(c => res += `${c.icono} ${c.jug} (${c.time}T)\n`);
+            res += `\n📜 HISTORIAL:\n${data.log || ""}`;
+            document.getElementById('box-notes').innerText = res;
+        }
+
+        function copyReport() {
+            navigator.clipboard.writeText(document.getElementById('box-notes').innerText);
+            alert("Copiado con éxito");
+        }
+
+        function tab(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); btn.classList.add('active');
+        }
+
+        function loadList() {
+            const list = document.getElementById('match-list'); list.innerHTML = '';
+            const s = sessions();
+            Object.keys(s).reverse().forEach(id => {
+                const item = document.createElement('div');
+                item.className = 'match-item';
+                item.innerHTML = `<span>${id}</span><span class="delete-x" onclick="deleteMatch(event,'${id}')">×</span>`;
+                item.onclick = () => { currentId = id; data = s[id]; launch(); };
+                list.appendChild(item);
+            });
+        }
+
+        function deleteMatch(e, id) {
+            e.stopPropagation(); if(!confirm("¿Borrar?")) return;
+            const s = sessions(); delete s[id];
+            localStorage.setItem('haxSessions', JSON.stringify(s)); loadList();
+        }
+
+        window.onmousedown = (e) => { if(e.button === 1) { e.preventDefault(); rotateTeams(); } };
+        window.oncontextmenu = (e) => e.preventDefault();
+        document.getElementById('modal-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') confirmModal(); });
+    </script>
+</body>
+</html>

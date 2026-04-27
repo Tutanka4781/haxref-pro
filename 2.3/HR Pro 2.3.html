@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="HaxRef Pro V2.3 - Marcador premium para HaxBall con integración Discord, historial de partidos y notificaciones en tiempo real.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HaxRef Pro V2.3</title>
+<style>
+:root {
+  --red:#ff2a2a;--blue:#2a8cff;--bg:#050505;--panel:#0f0f0f;
+  --border:#2a1a40;--accent:#b388ff;--yellow:#ffcc00;
+  --purple-dim:#3d1a6e;--purple-soft:#7c3aed;
+  --discord:#5865f2;--discord-dim:#1a1d3a;--discord-border:#2a2d5a;
+  --glass-bg:rgba(13,6,24,0.85);--glass-border:rgba(124,58,237,0.2);
+  --premium-glow:0 0 40px rgba(124,58,237,0.15);
+  --zoom-scale:1;
+  --font:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+body{background:var(--bg);color:#eee;font-family:var(--font);margin:0;overflow:hidden;height:100vh;display:flex;flex-direction:column;user-select:none;font-size:clamp(13px,1.1vw+0.4vh,17px)}
+
+/* ── MODALS ── */
+#modal-overlay,#generic-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+#modal-overlay{background:rgba(0,0,0,.9)}
+#generic-modal{background:rgba(0,0,0,.88);z-index:2000}
+.modal-card{background:#1a1a1a;border:1px solid var(--border);border-radius:18px;width:360px;box-shadow:var(--premium-glow),0 24px 60px rgba(0,0,0,.8);display:flex;flex-direction:column;gap:0;overflow:hidden;transition:transform .2s ease}
+.modal-card-head{background:linear-gradient(135deg,#0e0820 0%,#080612 100%);padding:18px 22px 14px;border-bottom:1px solid #1a1030}
+.modal-card-body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px}
+.modal-card input{width:100%;background:#0a0a15;border:2px solid #2a1a40;padding:13px 16px;color:#fff;border-radius:10px;outline:none;font-weight:700;font-size:17px;text-align:center;transition:.3s;box-sizing:border-box}
+.modal-card input:focus{border-color:var(--purple-soft);box-shadow:0 0 18px rgba(124,58,237,.2)}
+#suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px;max-height:100px;overflow-y:auto}
+.chip{background:#1a1025;padding:5px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #2a1a40;transition:.2s;color:#aaa}
+.chip:hover{background:#2a1a40;color:#fff;border-color:var(--purple-soft)}
+.chip.has-card{border-color:var(--yellow);color:var(--yellow)}
+.generic-card{background:#0d0d0d;border:1px solid #2a1a40;border-radius:14px;padding:28px 30px;width:360px;display:flex;flex-direction:column;gap:18px}
+.generic-msg{font-size:14px;color:#ccc;line-height:1.6;text-align:center;white-space:pre-line}
+.generic-btns{display:flex;gap:10px}
+.generic-btns button{flex:1;padding:12px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s}
+.gbtn-confirm{background:var(--purple-soft);color:#fff}
+.gbtn-confirm:hover{filter:brightness(1.15)}
+.gbtn-cancel{background:#1a1a1a;color:#666;border:1px solid #222!important}
+.gbtn-cancel:hover{color:#fff;border-color:#444!important}
+
+/* ── LAUNCHER ── */
+#launcher{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#12003a 0%,#050505 70%);overflow:hidden;animation:launcherFadeIn .8s ease-out}
+#launcher::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+#launcher::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(18,0,58,.85) 0%,transparent 65%);pointer-events:none}
+.launcher-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+.menu-container{width:300px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+.launcher-title{font-size:52px;font-weight:900;letter-spacing:-2px;margin-bottom:0;color:#c084fc;filter:drop-shadow(0 0 28px rgba(157,0,255,.75));line-height:1;animation:titlePulse 3s ease-in-out infinite}
+.launcher-badge{display:inline-block;background:#1a0a2e;border:1px solid #3d1a6e;color:#7c3aed;font-size:9px;font-weight:900;letter-spacing:3px;padding:3px 10px;border-radius:20px;margin:8px 0 28px}
+.launcher-subtitle{color:#3a1a5a;font-size:10px;letter-spacing:4px;font-weight:700;margin-bottom:6px}
+
+@keyframes launcherFadeIn{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}
+@keyframes titlePulse{0%,100%{filter:drop-shadow(0 0 28px rgba(157,0,255,.75))}50%{filter:drop-shadow(0 0 40px rgba(157,0,255,.95))}}
+@keyframes buttonShine{0%{background-position:-200% center}100%{background-position:200% center}}
+.btn-main{background-size:200% auto;transition:.3s ease}
+.btn-main:hover{background-position:right center}
+#history-panel{display:none;position:fixed;inset:0;background:#000;z-index:110;flex-direction:row}
+.hist-sidebar{width:80px;background:#07070f;border-right:1px solid #1a1030;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;overflow-y:auto}
+.hist-week-btn{width:62px;padding:8px 4px;border-radius:7px;background:transparent;border:1px solid transparent;color:#2a1a40;font-size:9px;font-weight:900;letter-spacing:.5px;cursor:pointer;text-align:center;transition:.2s;line-height:1.4}
+.hist-week-btn:hover{color:#7c3aed;border-color:#2a1a40}
+.hist-week-btn.active{background:#110820;color:#c084fc;border-color:#2a1a40}
+.hist-week-sep{width:40px;height:1px;background:#1a1030;margin:4px 0}
+.hist-content{flex:1;display:flex;flex-direction:column;padding:28px 28px 20px;overflow:hidden}
+#match-list{flex:1;overflow-y:auto;margin-top:16px}
+.match-sep{display:flex;align-items:center;gap:10px;margin:14px 0 6px}
+.match-sep-line{flex:1;height:1px;background:#1a1030}
+.match-sep-label{font-size:10px;color:#4a2a6a;font-weight:900;letter-spacing:2px;white-space:nowrap}
+.match-sep-del{background:transparent;border:none;color:#1a1020;font-size:13px;cursor:pointer;padding:0 4px;transition:.2s}
+.match-sep-del:hover{color:var(--red)}
+.match-item{padding:13px 15px;border-bottom:1px solid #0d0a15;display:flex;justify-content:space-between;cursor:pointer;font-size:14px;color:#888;align-items:center;transition:.15s}
+.match-item:hover{background:#0a0010;color:#fff;border-left:3px solid var(--purple-soft)}
+.match-actions{font-size:10px;color:#444;display:flex;gap:12px;align-items:center}
+.match-item:hover .match-actions .view-lnk{color:var(--accent)}
+.del-match-btn{background:transparent;border:none;color:#1a1030;font-size:15px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:.2s;line-height:1}
+.del-match-btn:hover{color:var(--red);background:rgba(255,42,42,.08)}
+.add-sep-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;background:transparent;border:1px dashed #1a1030;border-radius:7px;color:#2a1a40;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.2s;width:100%;margin-top:8px}
+.add-sep-btn:hover{border-color:#3d1a6e;color:#7c3aed}
+
+/* ── COUNTDOWN ── */
+#countdown-stack{display:flex;flex-direction:column;flex-shrink:0}
+.cd-bar{display:flex;background:#07020f;border-bottom:1px solid #1a1030;height:44px;align-items:center;padding:0 16px;gap:14px}
+.cd-label{font-size:11px;color:var(--accent);letter-spacing:1px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-track{flex:1;height:3px;background:#1a1030;border-radius:2px;overflow:hidden}
+.cd-fill{height:100%;background:var(--discord);border-radius:2px;transition:width 1s linear}
+.cd-num{font-size:13px;font-weight:900;color:var(--discord);font-family:monospace;min-width:20px;text-align:center}
+.cd-send{background:transparent;border:1px solid #1a2a1a;color:#2a4a2a;font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 12px;border-radius:5px;cursor:pointer;transition:.2s;white-space:nowrap}
+.cd-send:hover{color:#4caf50;border-color:#2a5a2a;background:rgba(76,175,80,.05)}
+.cd-cancel{background:transparent;border:1px solid #1a1030;color:#4a2a5a;font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 12px;border-radius:5px;cursor:pointer;transition:.2s;white-space:nowrap}
+.cd-cancel:hover{color:var(--red);border-color:#331111;background:rgba(255,42,42,.05)}
+
+/* ── APP ── */
+#main-app{display:none;flex-direction:column;height:100%;width:100%}
+@keyframes fadeInApp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+#main-app.visible{animation:fadeInApp .2s ease forwards}
+nav{display:flex;background:#080808;border-bottom:1px solid var(--border);height:56px;padding:0 12px;align-items:center;gap:8px;flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(9px,0.7vw+0.2vh,11px);color:#444;cursor:pointer;height:44px;border-radius:7px;font-weight:800;transition:.2s;letter-spacing:1px;border:1px solid transparent;position:relative}
+.nav-btn.active{background:#0e0618;color:#c084fc;border-color:#2a1a40;box-shadow:inset 0 0 20px rgba(0,0,0,.5)}
+.nav-btn.active::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:2px;background:var(--accent);border-radius:2px 2px 0 0;box-shadow:0 0 8px rgba(179,136,255,.6)}
+.nav-shortcut{display:none}
+.exit-btn{flex:0 0 36px;color:#3a1a1a;font-size:15px;transition:.2s}
+.exit-btn:hover{color:var(--red);text-shadow:0 0 12px rgba(255,42,42,.5)}
+.nav-sep{width:1px;height:28px;background:#1a1030;border-radius:2px;flex-shrink:0;margin:0 2px}
+#dc-dot{width:6px;height:6px;border-radius:50%;background:var(--discord);box-shadow:0 0 6px var(--discord);margin-bottom:2px;display:none}
+#dc-dot.on{display:block}
+.content{flex:1;padding:20px;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.section{display:none;flex-direction:column;height:100%;gap:16px}
+.section.active{display:flex}
+
+/* ── MARCADOR ── */
+#session-title-score{font-size:10px;color:#5a3a7a;font-weight:700;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:-8px}
+.score-container{flex:1;display:flex;align-items:center;justify-content:center;gap:20px;min-height:0}
+.score-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
+.score-team-name{font-size:clamp(14px,2.5vw,28px);font-weight:900;text-transform:uppercase;letter-spacing:4px;margin-bottom:-10px;transition:.3s}
+.red-glow{color:var(--red);text-shadow:0 0 20px rgba(255,42,42,.5)}
+.blue-glow{color:var(--blue);text-shadow:0 0 20px rgba(42,140,255,.5)}
+.score{font-size:clamp(60px,28vw,35vh);font-weight:900;cursor:pointer;transition:.1s;line-height:1;z-index:1;user-select:none}
+.score:active{transform:scale(.96)}
+.center-controls{display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 10px;flex-shrink:0}
+#period-btn{background:#0d0020;border:1px solid #2a1a40;color:#c084fc;font-size:13px;font-weight:900;letter-spacing:3px;padding:8px 18px;border-radius:8px;cursor:default;font-family:var(--font)}
+#period-btn.second{color:#a78bfa;border-color:#5b21b6;background:#110030}
+.swap-btn{background:transparent;border:none;color:#3d2a5a;font-size:24px;cursor:pointer;padding:0 10px;transition:.4s ease}
+.swap-btn:hover{color:var(--purple-soft);transform:rotate(180deg)}
+.status-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center}
+.status-btn{padding:clamp(8px,1.5vh,14px) 16px;border-radius:8px;font-weight:900;font-size:12px;border:none;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:1px}
+.btn-start{background:var(--purple-soft);color:#fff;box-shadow:0 0 20px rgba(124,58,237,.3)}
+.btn-start:hover{transform:scale(1.05);filter:brightness(1.1)}
+.btn-start.playing{background:#1a4d2a;color:#4caf50;border:1px solid #2a6a3a!important;box-shadow:0 0 18px rgba(76,175,80,.25)}
+.btn-start.playing:hover{background:#1e5c30;filter:brightness(1.1)}
+.btn-ht{background:#0d0020;color:#a78bfa;border:1px solid #3d1a6e!important;font-size:11px}
+.btn-ht:hover{background:#1a0040;border-color:#5b21b6!important}
+.btn-resend{background:transparent;border:1px solid #1a1030!important;color:#2a1a40;font-size:16px;padding:7px 11px;border-radius:8px;cursor:pointer;transition:opacity .3s,color .2s,border-color .2s}
+.btn-resend:hover{color:var(--discord);border-color:var(--discord)!important}
+.time-log{text-align:center;color:#6a4a8a;font-family:monospace;font-size:11px;background:rgba(42,26,64,.2);border:1px solid rgba(42,26,64,.4);border-radius:20px;padding:4px 14px;display:inline-block;align-self:center;letter-spacing:.5px}
+.ver-tag{display:none}
+
+/* ── TARJETAS ── */
+.row-flex{display:flex;gap:20px;flex:1;min-height:0}
+.col-flex{display:flex;flex-direction:column;flex:1;min-width:0;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:15px}
+.col-header{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;text-align:center;padding-bottom:10px;border-bottom:2px solid #1a1a1a}
+.card-btn-row{display:flex;gap:10px;margin-bottom:10px}
+.card-btn{flex:1;padding:14px 5px;border:none;border-radius:12px;font-weight:900;cursor:pointer;font-size:13px;transition:.2s;color:#000;letter-spacing:.5px}
+.card-btn:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.btn-yellow{background:var(--yellow);box-shadow:0 4px 14px rgba(255,204,0,.2)}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(255,42,42,.2)}
+.input-box{margin-top:8px;flex:1;overflow-y:auto}
+.card-item{display:flex;justify-content:space-between;background:#111;padding:10px 14px;margin-bottom:6px;border-radius:8px;font-size:12px;align-items:center;border-left:4px solid #222;transition:.15s}
+.card-item.TA{border-color:var(--yellow);background:rgba(255,204,0,.03)}
+.card-item.TR{border-color:var(--red);background:rgba(255,42,42,.04)}
+.delete-btn{color:#333;cursor:pointer;font-weight:700;padding:0 8px;font-size:15px}
+.delete-btn:hover{color:var(--red)}
+.btn-main{padding:14px;background:var(--panel);color:#fff;border:1px solid #2a1a40;cursor:pointer;font-size:13px;border-radius:8px;font-weight:700;transition:.2s;letter-spacing:1px}
+.btn-main:hover{border-color:var(--purple-soft);background:#110820}
+
+/* ── DISCORD ── */
+#sec-discord{overflow-y:auto;gap:12px!important}
+.dc-hero{display:flex;flex-direction:row;align-items:center;gap:12px;padding:4px 0 10px}
+.dc-title{font-size:14px;font-weight:900;color:#5865f2;letter-spacing:1px}
+.dc-sub{font-size:9px;color:#2a2d5a;letter-spacing:2px;margin-top:2px}
+.dc-url-wrap{background:#08080f;border:1px solid var(--discord-border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.dc-url-label{font-size:9px;letter-spacing:2px;color:#2a2d5a;text-transform:uppercase}
+.dc-url-input{width:100%;background:#000;border:1px solid #1a1d3a;border-radius:6px;padding:10px 14px;color:#888;font-size:12px;font-family:monospace;outline:none;transition:.2s;box-sizing:border-box}
+.dc-url-input:focus{border-color:var(--discord);color:#bbb}
+.dc-url-input::placeholder{color:#1a1d3a}
+.dc-btn-row{display:flex;gap:10px;margin-top:4px}
+.dc-btn{flex:1;padding:11px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;transition:.2s;text-transform:uppercase}
+.dc-btn-check{background:#0d1020;color:#3a3d6a;border:1px solid var(--discord-border)!important}
+.dc-btn-check:hover{background:#12152a;color:var(--discord);border-color:var(--discord)!important}
+.dc-btn-connect{background:var(--discord);color:#fff}
+.dc-btn-connect:hover{filter:brightness(1.15)}
+.dc-btn-connect.connected{background:#1a1d3a;color:var(--discord);border:1px solid var(--discord-border)!important}
+.dc-btn-connect.connected:hover{background:rgba(255,42,42,.08);color:var(--red);border-color:#331111!important}
+.dc-status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#07090f;border:1px solid #0d1020;border-radius:8px}
+.dc-status-dot{width:7px;height:7px;border-radius:50%;background:#1a1d3a;transition:.3s;flex-shrink:0}
+.dc-status-dot.on{background:var(--discord);box-shadow:0 0 8px rgba(88,101,242,.8)}
+.dc-status-txt{font-size:11px;color:#2a2d5a;letter-spacing:1px}
+.dc-status-txt.on{color:var(--discord)}
+.dc-webhook-info{background:#07090f;border:1px solid #0d1020;border-radius:8px;padding:12px 16px;display:none;flex-direction:column;gap:8px}
+.dc-webhook-info.visible{display:flex}
+.dc-wi-row{display:flex;align-items:center;gap:10px;font-size:11px}
+.dc-wi-key{color:#3a3d6a;font-weight:700;letter-spacing:1px;min-width:64px;font-size:10px}
+.dc-wi-val{color:var(--discord);font-family:monospace}
+.dc-info-box{background:#07090f;border:1px solid #0d1020;border-radius:8px;padding:12px 16px;font-size:11px;color:#3a3d6a;line-height:1.9}
+.dc-info-box b{color:#4a4d7a}
+.dc-end-btn{padding:13px;border-radius:8px;font-weight:900;font-size:13px;border:1px solid #331111;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:1px;width:100%;background:rgba(255,42,42,.06);color:#4a1a1a}
+.dc-end-btn:hover{background:rgba(255,42,42,.12);color:var(--red);border-color:var(--red)}
+
+/* ── WEBHOOK EDITOR ── */
+.we-grid{display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto}
+.we-card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;transition:.2s}
+.we-card:hover{border-color:#2a1a40}
+.we-card-header{display:flex;align-items:center;gap:10px}
+.we-icon{font-size:16px;flex-shrink:0}
+.we-label{font-size:11px;font-weight:900;letter-spacing:2px;color:#5a3a7a;text-transform:uppercase;flex:1}
+.we-row{display:flex;gap:8px;align-items:center}
+.we-row-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+.we-input{flex:1;background:#000;border:1px solid #1a1a2a;border-radius:8px;padding:9px 12px;color:#ccc;font-size:12px;font-family:monospace;outline:none;transition:.2s}
+.we-input:focus{border-color:var(--purple-soft);color:#fff}
+.we-color-wrap{display:flex;align-items:center;gap:6px;background:#000;border:1px solid #1a1a2a;border-radius:6px;padding:5px 10px;cursor:pointer;transition:.2s}
+.we-color-wrap:hover{border-color:var(--purple-soft)}
+.we-color-wrap input[type=color]{width:26px;height:26px;border:none;background:none;cursor:pointer;padding:0;border-radius:4px}
+.we-color-lbl{font-size:10px;color:#888;font-family:monospace;letter-spacing:1px;min-width:52px}
+.we-save-btn{padding:7px 14px;background:var(--purple-dim);color:var(--accent);border:1px solid #2a1a40;border-radius:6px;font-size:10px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap}
+.we-save-btn:hover{background:var(--purple-soft);color:#fff;border-color:var(--purple-soft)}
+.we-save-btn.saved{background:#0a1a0a;color:#4caf50;border-color:#1a3a1a}
+.we-vars{font-size:10px;color:#3a2a5a;letter-spacing:.5px;line-height:2;display:flex;flex-wrap:wrap;gap:4px}
+.we-var-chip{background:#0f0a1a;border:1px solid #1e1230;border-radius:4px;padding:1px 7px;cursor:pointer;transition:.2s;font-family:monospace;color:#5a3a8a}
+.we-var-chip:hover{background:#1a1030;border-color:var(--purple-soft);color:var(--accent)}
+.we-var-chip.copied{background:#0a1a0a;border-color:#2a5a2a;color:#4caf50}
+.we-test-btn{padding:7px 14px;background:transparent;color:#2a2d5a;border:1px solid #1a1d3a;border-radius:6px;font-size:10px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap}
+.we-test-btn:hover{color:var(--discord);border-color:var(--discord);background:var(--discord-dim)}
+.we-test-btn.testing{color:var(--discord);border-color:var(--discord)}
+
+/* ── MSG HISTORY MODAL ── */
+#msg-history-modal{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);}
+.mh-panel{background:#08060f;border:1px solid var(--border);border-radius:16px;width:360px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.85),0 0 0 1px rgba(179,136,255,.06)}
+.mh-head{background:linear-gradient(135deg,#0e0820 0%,#080612 100%);padding:16px 20px 13px;border-bottom:1px solid #1a1030;display:flex;align-items:center;gap:10px}
+.mh-title{font-size:11px;font-weight:900;letter-spacing:3px;color:var(--accent);flex:1;text-transform:uppercase}
+.mh-close{background:transparent;border:none;color:#3a2a5a;font-size:18px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:5px;transition:.2s}
+.mh-close:hover{color:var(--red);background:rgba(255,42,42,.08)}
+.mh-body{flex:1;overflow-y:auto;padding:10px 14px}
+.mh-empty{font-size:12px;color:#2a1a40;text-align:center;padding:28px 0;letter-spacing:1px}
+.mh-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid #0e0a18;transition:.15s}
+.mh-row:hover{background:#0d0920}
+.mh-label{flex:1;font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mh-time{font-size:10px;color:#3a2a5a;font-family:monospace;flex-shrink:0}
+.mh-del{background:transparent;border:1px solid #1a1030;color:#2a1a40;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:5px;transition:.2s;flex-shrink:0}
+.mh-del:hover{color:var(--red);border-color:#331111;background:rgba(255,42,42,.06)}
+.cd-msgs-btn{background:transparent;border:1px solid #1a1030;color:#2a1a40;font-size:10px;font-weight:700;letter-spacing:1px;padding:5px 10px;border-radius:5px;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}
+.cd-msgs-btn:hover{color:var(--accent);border-color:#2a1a40;background:rgba(179,136,255,.05)}
+.cd-msgs-btn.has-msgs{color:#5a3a8a;border-color:#2a1a40}
+
+/* ── WEBHOOK PROFILES MODAL ── */
+#wh-profiles-modal{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);}
+.whp-card{background:#1a1a1a;border:1px solid var(--discord-border);border-radius:18px;width:360px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.8),0 0 0 1px rgba(88,101,242,.08)}
+.whp-head{background:linear-gradient(135deg,#0d0f22 0%,#0a0c1a 100%);padding:18px 22px 15px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #0d1020;flex-shrink:0}
+.whp-head-icon{width:32px;height:32px;background:#1a1d3a;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 14px rgba(88,101,242,.25)}
+.whp-head-title{font-size:11px;font-weight:900;letter-spacing:3px;color:#3a3d6a;text-transform:uppercase;flex:1}
+.whp-list{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.whp-item{background:#07090f;border:1px solid #0d1020;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:.2s;cursor:pointer}
+.whp-item:hover{border-color:var(--discord);background:#09101f}
+.whp-item.active-profile{border-color:var(--discord);background:#0a0d1a}
+.whp-dot{width:7px;height:7px;border-radius:50%;background:#1a1d3a;flex-shrink:0;transition:.3s}
+.whp-dot.checking{background:#ffcc00;box-shadow:0 0 6px rgba(255,204,0,.5);animation:whp-pulse .8s ease-in-out infinite}
+.whp-dot.ok{background:var(--discord);box-shadow:0 0 6px rgba(88,101,242,.6)}
+.whp-dot.err{background:var(--red);box-shadow:0 0 6px rgba(255,42,42,.5)}
+@keyframes whp-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.whp-info{flex:1;min-width:0}
+.whp-name{font-size:13px;font-weight:700;color:#bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.whp-url{font-size:9px;color:#2a2d5a;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.whp-use-btn{background:var(--discord);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:10px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s;flex-shrink:0;white-space:nowrap}
+.whp-use-btn:hover{filter:brightness(1.15)}
+.whp-footer{padding:12px 14px;border-top:1px solid #0d1020;display:flex;gap:8px;flex-shrink:0}
+.whp-skip-btn{flex:1;padding:11px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;background:#0d0f1a;color:#3a3d6a;border:1px solid #1a1d3a;transition:.2s;text-transform:uppercase}
+.whp-skip-btn:hover{color:#fff;border-color:#2a2d5a}
+.whp-nohook-btn{flex:1;padding:11px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;background:#0a0d1a;color:#8a8a9a;border:1px solid #2a2d5a;transition:.2s;text-transform:uppercase}
+.whp-nohook-btn:hover{color:#fff;border-color:#5865f2;background:#12152a}
+/* Gestión de perfiles en sección Discord */
+.whp-manage-item{background:#07090f;border:1px solid #0d1020;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;transition:.2s}
+.whp-manage-item.is-active{border-color:var(--discord)}
+.whp-manage-actions{display:flex;gap:6px;flex-shrink:0}
+.whp-act-btn{background:transparent;border:1px solid #1a1030;color:#3a2a5a;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;transition:.2s;white-space:nowrap;font-weight:700}
+.whp-act-btn:hover{color:#fff;border-color:#3a2a5a}
+.whp-act-btn.del:hover{color:var(--red);border-color:#331111}
+.whp-act-btn.connect{color:var(--discord);border-color:var(--discord-border)}
+.whp-act-btn.connect:hover{background:var(--discord-dim)}
+#sec-export{overflow-y:auto;gap:14px!important}
+.exp-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.exp-item{display:flex;align-items:center;gap:12px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:12px 16px;transition:.2s}
+.exp-item:hover{border-color:#2a1a40}
+.exp-item input[type=checkbox]{accent-color:var(--purple-soft);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.exp-item-info{flex:1}
+.exp-item-title{font-size:13px;font-weight:700;color:#ccc}
+.exp-item-sub{font-size:10px;color:#3a3a3a;margin-top:2px}
+.exp-btn-row{display:flex;gap:10px}
+.exp-btn{flex:1;padding:13px;border-radius:8px;font-weight:900;font-size:12px;border:none;cursor:pointer;transition:.2s;letter-spacing:1px;text-transform:uppercase}
+.exp-btn-dl{background:var(--purple-soft);color:#fff}
+.exp-btn-dl:hover{filter:brightness(1.1)}
+.exp-btn-all{background:#0d0d0d;color:#555;border:1px solid #1a1a1a!important}
+.exp-btn-all:hover{color:#fff;border-color:#333!important}
+.exp-btn-import{background:#0d1020;color:#3a3d6a;border:1px solid var(--discord-border)!important}
+.exp-btn-import:hover{background:#12152a;color:var(--discord);border-color:var(--discord)!important}
+.exp-empty{text-align:center;color:#222;font-size:13px;padding:30px}
+
+/* ── MODO CLARO ── */
+body.light-mode{
+  --bg:#f2eeff;--panel:#ffffff;--border:#cdb8f0;--accent:#6d28d9;
+  --purple-dim:#ede5ff;--purple-soft:#7c3aed;
+  --discord-dim:#eef0ff;--discord-border:#b0b8f8;
+  --glass-bg:rgba(255,255,255,0.95);--glass-border:rgba(124,58,237,0.2);
+  --premium-glow:0 0 30px rgba(124,58,237,0.08);
+  background:var(--bg);color:#1a1a2e;
+}
+/* Nav */
+body.light-mode nav{background:#fff;border-bottom-color:#ddd0f8;box-shadow:0 1px 8px rgba(109,40,217,.06)}
+body.light-mode .nav-btn{color:#999}
+body.light-mode .nav-btn.active{background:#f0e8ff;color:#6d28d9;border-color:#c8a8f0}
+body.light-mode .nav-btn.active::after{background:var(--purple-soft)}
+body.light-mode .nav-sep{background:#e0d0f8}
+body.light-mode .exit-btn{color:#c0a0d0}
+body.light-mode .exit-btn:hover{color:#c0392b}
+/* Contenido */
+body.light-mode .content{background:var(--bg)}
+body.light-mode .col-flex{background:#fff;border-color:#e4d8f8;box-shadow:0 2px 10px rgba(109,40,217,.04)}
+body.light-mode .col-flex:hover{box-shadow:0 6px 20px rgba(109,40,217,.1)}
+body.light-mode .col-header{color:#5a3a8a;border-bottom-color:#ede5ff}
+body.light-mode .card-item{background:#faf8ff;border-left-color:#e0d0f0;color:#333}
+body.light-mode .card-item.TA{background:rgba(255,204,0,.07);border-left-color:var(--yellow)}
+body.light-mode .card-item.TR{background:rgba(255,42,42,.05);border-left-color:var(--red)}
+body.light-mode .delete-btn{color:#c0a0d0}
+body.light-mode .delete-btn:hover{color:var(--red)}
+/* Marcador */
+body.light-mode #score-red{color:#e01010;text-shadow:0 0 18px rgba(224,16,16,.2)}
+body.light-mode #score-blue{color:#1060d0;text-shadow:0 0 18px rgba(16,96,208,.2)}
+body.light-mode #period-btn{background:#f0e8ff;color:#6d28d9;border-color:#c4a0f0!important}
+body.light-mode #period-btn.second{background:#ede5ff;color:#5b21b6;border-color:#a080d8!important}
+body.light-mode .swap-btn{color:#c0a0d0}
+body.light-mode .swap-btn:hover{color:var(--purple-soft)}
+body.light-mode .time-log{color:#7a50a0;background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.15)}
+body.light-mode #session-title-score .red-glow{color:#c0101010;text-shadow:none;color:#d01010}
+body.light-mode #session-title-score .blue-glow{color:#1060d0;text-shadow:none}
+body.light-mode #lbl-red{color:#c01010!important;text-shadow:none}
+body.light-mode #lbl-blue{color:#1060c0!important;text-shadow:none}
+/* Botones de estado */
+body.light-mode .btn-start{background:var(--purple-soft);color:#fff}
+body.light-mode .btn-ht{background:#ede5ff;color:#5b21b6;border-color:#c4a0f0!important}
+body.light-mode .btn-resend{border-color:#d0c0e8!important;color:#a080c0}
+body.light-mode .btn-resend:hover{color:var(--discord);border-color:var(--discord)!important}
+body.light-mode .dc-end-btn{background:rgba(192,16,16,.05);color:#c05050;border-color:#e0b0b0}
+body.light-mode .dc-end-btn:hover{background:rgba(192,16,16,.12);color:#c01010;border-color:#c01010}
+/* Modales */
+body.light-mode #modal-overlay{background:rgba(200,180,240,.6)}
+body.light-mode #generic-modal{background:rgba(200,180,240,.6)}
+body.light-mode .modal-card{background:#fff;border-color:#cdb8f0;box-shadow:0 16px 48px rgba(109,40,217,.15)}
+body.light-mode .modal-card-head{background:linear-gradient(135deg,#f5f0ff,#ede8ff);border-bottom-color:#e0d0f0}
+body.light-mode .modal-card-head div{color:#5a3a8a!important}
+body.light-mode .modal-card input{background:#f8f5ff;border-color:#cdb8f0;color:#111}
+body.light-mode .modal-card input:focus{border-color:var(--purple-soft)}
+body.light-mode .chip{background:#f0e8ff;border-color:#d0b8f0;color:#6d28d9}
+body.light-mode .chip:hover{background:#e8d8ff}
+body.light-mode .chip.has-card{border-color:#c09000;color:#905000}
+body.light-mode .generic-card{background:#fff;border-color:#cdb8f0;box-shadow:0 12px 36px rgba(109,40,217,.12)}
+body.light-mode .generic-msg{color:#333}
+body.light-mode .gbtn-cancel{background:#f0e8ff;color:#888;border-color:#d0b8f0!important}
+body.light-mode .gbtn-cancel:hover{color:#333;border-color:#a080c0!important}
+/* Countdown */
+body.light-mode .cd-bar{background:#f5f0ff;border-bottom-color:#e0d0f0}
+body.light-mode .cd-label{color:var(--accent)}
+body.light-mode .cd-track{background:#e8d8f8}
+body.light-mode .cd-num{color:var(--discord)}
+body.light-mode .cd-send{border-color:#b0d0b0!important;color:#508050}
+body.light-mode .cd-send:hover{color:#307030;border-color:#709070!important}
+body.light-mode .cd-cancel{border-color:#d0c0e0!important;color:#8060a0}
+body.light-mode .cd-cancel:hover{color:#c01010;border-color:#e08080!important}
+body.light-mode .cd-msgs-btn{border-color:#d0c0e0!important;color:#8060a0}
+body.light-mode .cd-msgs-btn:hover{color:var(--accent);border-color:#a080c0!important}
+/* Historial */
+body.light-mode #history-panel{background:#f2eeff}
+body.light-mode .hist-sidebar{background:#ede5ff;border-right-color:#d8c8f0}
+body.light-mode .hist-week-btn{color:#b090d0}
+body.light-mode .hist-week-btn:hover{color:#6d28d9;border-color:#c0a0e0}
+body.light-mode .hist-week-btn.active{background:#e8d8ff;color:#6d28d9;border-color:#c0a0e0}
+body.light-mode .hist-week-sep{background:#d0c0e8}
+body.light-mode .match-item{color:#555;border-bottom-color:#e8e0f0}
+body.light-mode .match-item:hover{background:#f0e8ff;color:#111;border-left-color:var(--purple-soft)}
+body.light-mode .match-sep-line{background:#e0d0f0}
+body.light-mode .match-sep-label{color:#9070b0}
+body.light-mode .add-sep-btn{border-color:#d0c0e8;color:#9070b0}
+body.light-mode .add-sep-btn:hover{border-color:#a080c0;color:#6d28d9}
+/* Discord */
+body.light-mode .dc-hero .dc-title{color:var(--discord)}
+body.light-mode .dc-sub{color:#8890c0}
+body.light-mode .dc-url-wrap{background:#f5f0ff;border-color:#cdb8f0}
+body.light-mode .dc-url-label{color:#9070b0}
+body.light-mode .dc-url-input{background:#fff;border-color:#cdb8f0;color:#333}
+body.light-mode .dc-url-input:focus{border-color:var(--discord);color:#111}
+body.light-mode .dc-url-input::placeholder{color:#c0b0d8}
+body.light-mode .dc-btn-check{background:#eef0ff;color:#7080c0;border-color:#b0b8f8!important}
+body.light-mode .dc-btn-check:hover{background:#e0e4ff;color:var(--discord);border-color:var(--discord)!important}
+body.light-mode .dc-status-bar{background:#f5f0ff;border-color:#d8d0f0}
+body.light-mode .dc-status-txt{color:#b090c0}
+body.light-mode .dc-status-txt.on{color:var(--discord)}
+body.light-mode .dc-webhook-info{background:#f5f0ff;border-color:#d8d0f0}
+body.light-mode .dc-wi-key{color:#9070b0}
+body.light-mode .dc-info-box{background:#f5f0ff;border-color:#d8d0f0;color:#7060a0}
+body.light-mode .dc-info-box b{color:#5a3a8a}
+/* Webhook editor */
+body.light-mode .we-card{background:#fff;border-color:#e4d8f8}
+body.light-mode .we-card:hover{border-color:#c0a0e0}
+body.light-mode .we-label{color:#7a50a0}
+body.light-mode .we-input{background:#f8f5ff;border-color:#d0c0e8;color:#222}
+body.light-mode .we-input:focus{border-color:var(--purple-soft);color:#111}
+body.light-mode .we-color-wrap{background:#f8f5ff;border-color:#d0c0e8}
+body.light-mode .we-color-lbl{color:#9070a0}
+body.light-mode .we-save-btn{background:#ede5ff;color:#6d28d9;border-color:#c4a0f0}
+body.light-mode .we-save-btn:hover{background:var(--purple-soft);color:#fff}
+body.light-mode .we-save-btn.saved{background:#e8f5e8;color:#307030;border-color:#a0c8a0}
+body.light-mode .we-vars{color:#9070a0}
+body.light-mode .we-var-chip{background:#f0e8ff;border-color:#d0b8f0;color:#7040a0}
+body.light-mode .we-var-chip:hover{background:#e8d8ff;border-color:var(--purple-soft);color:var(--accent)}
+body.light-mode .we-test-btn{border-color:#d0d8f8!important;color:#8090c0}
+body.light-mode .we-test-btn:hover{color:var(--discord);border-color:var(--discord)!important;background:var(--discord-dim)}
+/* Exportar */
+body.light-mode .exp-item{background:#fff;border-color:#e4d8f8}
+body.light-mode .exp-item:hover{border-color:#c4a0f0}
+body.light-mode .exp-item-title{color:#333}
+body.light-mode .exp-item-sub{color:#9090a0}
+body.light-mode .exp-btn-all{background:#f0e8ff;color:#888;border-color:#d0c0e8!important}
+body.light-mode .exp-btn-all:hover{color:#333;border-color:#a080c0!important}
+body.light-mode .exp-empty{color:#c0b0d8}
+/* Ajustes */
+body.light-mode #sec-settings>div{background:#fff;border-color:#e4d8f8}
+body.light-mode #sec-settings .col-header,
+body.light-mode #sec-settings [style*="3a2a5a"]{color:#7a50a0!important}
+/* Perfiles webhook */
+body.light-mode .whp-card{background:#fff;border-color:#c8b0e8;box-shadow:0 16px 48px rgba(109,40,217,.12)}
+body.light-mode .whp-head{background:linear-gradient(135deg,#f5f0ff,#ede8ff);border-bottom-color:#e0d0f0}
+body.light-mode .whp-head-icon{background:#eef0ff}
+body.light-mode .whp-head-title{color:#8090c0}
+body.light-mode .whp-item{background:#f8f5ff;border-color:#e0d0f0}
+body.light-mode .whp-item:hover{border-color:var(--discord);background:#eef0ff}
+body.light-mode .whp-name{color:#333}
+body.light-mode .whp-url{color:#9090b0}
+body.light-mode .whp-skip-btn{background:#f0e8ff;color:#9080b0;border-color:#d0c0e8}
+body.light-mode .whp-nohook-btn{background:#eef0ff;color:#7080b0;border-color:#b0b8f8}
+/* Msg history */
+body.light-mode .mh-panel{background:#fff;border-color:#cdb8f0}
+body.light-mode .mh-head{background:linear-gradient(135deg,#f5f0ff,#ede8ff);border-bottom-color:#e0d0f0}
+body.light-mode .mh-title{color:var(--accent)}
+body.light-mode .mh-close{color:#c0a0d0}
+body.light-mode .mh-row{border-bottom-color:#f0e8ff}
+body.light-mode .mh-row:hover{background:#f8f5ff}
+body.light-mode .mh-label{color:#444}
+body.light-mode .mh-time{color:#b090c0}
+body.light-mode .mh-del{border-color:#d0c0e8!important;color:#b090c0}
+body.light-mode .mh-del:hover{color:var(--red);border-color:#e08080!important}
+/* Launcher */
+body.light-mode #launcher{background:radial-gradient(ellipse at 50% 35%,#e0d0ff 0%,#f2eeff 65%)}
+body.light-mode #launcher::before{background-image:linear-gradient(rgba(109,40,217,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(109,40,217,.06) 1px,transparent 1px)}
+body.light-mode .launcher-title{color:#5b21b6;filter:drop-shadow(0 0 16px rgba(91,33,182,.3))}
+body.light-mode .launcher-badge{background:#ede5ff;border-color:#c4a0f0;color:#6d28d9}
+body.light-mode .launcher-subtitle{color:#b090d0}
+body.light-mode .btn-main{background:#fff;border-color:#d0b8f0;color:#5b21b6}
+body.light-mode .btn-main:hover{background:#f0e8ff;border-color:var(--purple-soft)}
+/* Mini mode */
+body.light-mode #mini-exit-btn{background:#f0e8ff;border-color:#c4a0f0;color:#6d28d9}
+/* Toggle buttons */
+.setting-toggle-btn{
+  padding:5px 12px;border-radius:7px;font-size:11px;font-weight:900;letter-spacing:1px;
+  cursor:pointer;border:1px solid #2a1a40;background:#0d0020;color:#c084fc;
+  transition:.2s;text-transform:uppercase;white-space:nowrap;
+}
+.setting-toggle-btn:hover{background:#1a0040;border-color:#7c3aed}
+body.light-mode .setting-toggle-btn{background:#f0e8ff;border-color:#c4a0f0;color:#6d28d9}
+body.light-mode .setting-toggle-btn:hover{background:#e8d8ff;border-color:#8050c0}
+
+/* ── COMPATIBILIDAD MÓVIL ── */
+/* Evitar hover-sticky en touch */
+@media (hover:none) and (pointer:coarse){
+  .nav-btn:hover,.col-flex:hover,.card-item:hover,.match-item:hover,
+  .we-card:hover,.exp-item:hover,.whp-item:hover,.mh-row:hover,
+  .btn-main:hover,.status-btn:hover,.dc-btn:hover,.btn-main::after,
+  .status-btn::after,.dc-btn::after{
+    transform:none!important;filter:none!important;
+    background:inherit;border-color:inherit;
+  }
+  /* Tap targets más grandes en móvil */
+  .nav-btn{height:52px;min-width:40px}
+  .status-btn{padding:12px 14px;font-size:13px}
+  .card-btn{padding:16px 5px}
+  .delete-btn{padding:4px 12px;font-size:18px}
+  .score{cursor:default}
+  /* Evitar que :active quede pegado */
+  .btn-start:active,.nav-btn:active{filter:brightness(0.92)}
+}
+/* Pantallas pequeñas (móvil vertical) */
+@media (max-width:480px){
+  nav{padding:0 6px;gap:4px;height:52px}
+  .nav-btn{font-size:9px;height:44px;letter-spacing:.5px;padding:0 2px}
+  .nav-sep{display:none}
+  .content{padding:12px 10px}
+  .score{font-size:clamp(56px,30vw,32vh)}
+  .status-controls{gap:5px;flex-wrap:wrap;justify-content:center}
+  .status-btn{font-size:11px;padding:9px 10px;letter-spacing:.5px}
+  .row-flex{flex-direction:column;gap:12px}
+  .modal-card,.generic-card,.whp-card,.mh-panel{width:94vw;max-width:360px}
+  .col-flex{padding:12px}
+  #sec-settings>div{padding:14px 14px}
+  .we-input{font-size:14px;padding:11px 12px}
+}
+/* Pantallas medianas (tablet/landscape) */
+@media (min-width:481px) and (max-width:768px){
+  .modal-card,.generic-card,.whp-card,.mh-panel{width:88vw;max-width:400px}
+  .score{font-size:clamp(60px,26vw,34vh)}
+}
+body.mini-mode nav{display:none}
+body.mini-mode .content{padding:8px}
+body.mini-mode .section{gap:4px}
+body.mini-mode #sec-score .status-controls{display:none}
+body.mini-mode #sec-score [style*="time-log"]{display:none}
+body.mini-mode #sec-score [style*="msgs-fixed"]{display:none}
+body.mini-mode #session-title-score{font-size:clamp(11px,3vw,16px)!important;margin-bottom:0}
+body.mini-mode .score{font-size:clamp(70px,38vw,48vh)!important}
+body.mini-mode .score-container{gap:8px}
+body.mini-mode #period-btn{font-size:clamp(10px,2vw,14px);padding:5px 12px;letter-spacing:2px}
+body.mini-mode .swap-btn{font-size:20px;padding:0 6px}
+body.mini-mode .center-controls{gap:6px}
+/* Botón salir mini — siempre visible en mini mode */
+#mini-exit-btn{display:none;position:fixed;top:6px;right:6px;z-index:500;background:#0d0020;border:1px solid #2a1a40;color:#7c3aed;font-size:10px;font-weight:900;padding:4px 10px;border-radius:6px;cursor:pointer;letter-spacing:1px}
+body.mini-mode #mini-exit-btn{display:block}
+
+/* ── WE-VARS más visibles ── */
+.we-vars{font-size:clamp(11px,1vw,13px);color:#5a3a7a;letter-spacing:.5px;line-height:1;display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.we-var-chip{background:#140d22;border:1px solid #2a1a40;border-radius:6px;padding:4px 10px;cursor:pointer;transition:.2s;font-family:monospace;color:#8a5ab8;font-size:clamp(11px,1vw,13px);font-weight:700}
+.we-var-chip:hover{background:#1e1040;border-color:var(--purple-soft);color:var(--accent)}
+.we-var-chip.copied{background:#0a1a0a;border-color:#2a5a2a;color:#4caf50}
+/* we-card más aireado */
+.we-card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;transition:.2s}
+.we-label{font-size:clamp(10px,.9vw,12px);font-weight:900;letter-spacing:2px;color:#5a3a7a;text-transform:uppercase;flex:1}
+.we-input{flex:1;background:#000;border:1px solid #1a1a2a;border-radius:8px;padding:10px 14px;color:#ccc;font-size:clamp(12px,1vw,14px);font-family:monospace;outline:none;transition:.2s}
+#goal-ball{position:fixed;pointer-events:none;z-index:9999;font-size:52px;opacity:0}
+@keyframes ball-float{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  20%{opacity:1;transform:translate(-50%,-60%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-180%) scale(.85)}
+}
+#goal-ball.animate{animation:ball-float 1.4s cubic-bezier(.22,1,.36,1) forwards}
+#score-red{color:var(--red)}
+#score-blue{color:var(--blue)}
+
+@media(max-height:420px){
+  .score{font-size:clamp(50px,22vw,28vh)}
+  #session-title-score,.ver-tag{display:none}
+  .status-btn{padding:7px 10px;font-size:11px}
+  nav{height:44px}.nav-btn{height:36px;font-size:9px}.nav-shortcut{display:none}
+}
+/* ── PREMIUM TOUCH & ACCESSIBILITY ── */
+/* Reduced motion support */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #launcher{animation:none}
+  .launcher-title{animation:none}
+}
+/* High contrast mode support */
+@media (prefers-contrast:high){
+  :root{--border:#5a3a7a;--accent:#d4a8ff}
+  .nav-btn.active{border-color:var(--accent)}
+  .modal-card{border-width:2px}
+}
+/* Focus visible improvements for keyboard navigation */
+.nav-btn:focus-visible,.btn-main:focus-visible,.card-btn:focus-visible,.dc-btn:focus-visible,.exp-btn:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;box-shadow:0 0 12px rgba(179,136,255,.4)
+}
+/* Premium card hover effects */
+.col-flex{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.col-flex:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+/* Score glow on focus */
+.score:focus-visible{filter:brightness(1.2);outline:2px solid var(--accent);outline-offset:4px}
+/* Premium button hover with gradient shift */
+.btn-main,.status-btn,.dc-btn{position:relative;overflow:hidden}
+.btn-main::after,.status-btn::after,.dc-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .5s ease}
+.btn-main:hover::after,.status-btn:hover::after,.dc-btn:hover::after{left:100%}
+/* Screen reader only text */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+</style>
+<meta name="theme-color" content="#7c3aed">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HaxRef Pro">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+
+<div id="goal-ball">⚽</div>
+
+<!-- REVERT ZOOM BUTTON -->
+<div id="revert-zoom-btn" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5000;background:#0a0a0a;border:1px solid var(--border);border-radius:12px;padding:16px 20px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:1px;text-align:center" onclick="revertZoom()">REVERTIR ZOOM (15s)</div>
+
+<!-- MODAL JUGADOR -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-label">
+  <div class="modal-card">
+    <div class="modal-card-head">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;font-weight:900;color:#6a3a9a;letter-spacing:2px" id="modal-title-label">DATOS JUGADOR</div>
+        <div onclick="cancelModal()" style="color:#3d1a5a;font-size:17px;cursor:pointer;line-height:1;padding:2px 6px;transition:.2s;border-radius:4px" onmouseover="this.style.color='#ff2a2a'" onmouseout="this.style.color='#3d1a5a'">✕</div>
+      </div>
+    </div>
+    <div class="modal-card-body">
+      <input type="text" id="modal-input" autocomplete="off" placeholder="Nombre...">
+      <input type="text" id="modal-reason" autocomplete="off" placeholder="Motivo (opcional)…" style="display:none;background:#0a0a15;border:2px solid #2a1a40;padding:13px 16px;color:#fff;border-radius:10px;outline:none;font-size:15px;text-align:center;width:100%;transition:.3s;box-sizing:border-box">
+      <div id="suggestions"></div>
+      <button class="btn-main" style="width:100%;border-color:var(--purple-soft);color:var(--accent)" onclick="confirmModal()">CONFIRMAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GENÉRICO -->
+<div id="generic-modal" role="dialog" aria-modal="true" aria-label="Cuadro de diálogo">
+  <div class="generic-card">
+    <div class="generic-msg" id="generic-msg-text"></div>
+    <div class="generic-btns" id="generic-btns"></div>
+  </div>
+</div>
+
+<!-- WEBHOOK PROFILES MODAL -->
+<div id="wh-profiles-modal" role="dialog" aria-modal="true" aria-label="Seleccionar perfil de webhook" onclick="if(event.target===this)_whpClose(null,false)">
+  <div class="whp-card">
+    <div class="whp-head">
+      <div class="whp-head-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#5865f2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.03.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      </div>
+      <div class="whp-head-title">Seleccionar canal</div>
+    </div>
+    <div class="whp-list" id="whp-list"></div>
+    <div class="whp-footer">
+      <button class="whp-nohook-btn" type="button" onclick="_whpClose(null,true)">SIN WEBHOOK</button>
+      <button class="whp-skip-btn" type="button" onclick="_whpClose(null,false)">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- LAUNCHER -->
+<div id="launcher" role="main" aria-label="Pantalla de inicio de HaxRef Pro">
+  <div class="launcher-inner">
+    <div class="launcher-title">HaxRef Pro</div>
+    <div class="launcher-badge">V2.3</div>
+    <div class="launcher-subtitle">by tutanka</div>
+    <div class="menu-container" role="navigation" aria-label="Menú principal">
+      <div class="btn-main" onclick="startNewMatch()" role="button" tabindex="0" aria-label="Iniciar nuevo partido" onkeydown="if(event.key==='Enter'||event.key===' ')startNewMatch()">⚽ NUEVO PARTIDO</div>
+      <div class="btn-main" style="background:transparent;color:#4a2a6a;border-color:#1a1030" onclick="toggleHistory(true)" role="button" tabindex="0" aria-label="Ver historial de partidos" onkeydown="if(event.key==='Enter'||event.key===' ')toggleHistory(true)">📋 HISTORIAL</div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORIAL -->
+<div id="history-panel" role="region" aria-label="Panel de historial">
+  <div class="hist-sidebar" id="hist-sidebar"></div>
+  <div class="hist-content">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:900;color:#c084fc;letter-spacing:2px">HISTORIAL</div>
+      <div class="delete-btn" style="font-size:22px;color:#fff" onclick="toggleHistory(false)">✕</div>
+    </div>
+    <div id="match-list"></div>
+    <button class="add-sep-btn" onclick="addSeparator()">＋ AÑADIR SEPARADOR</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" role="main">
+  <button id="mini-exit-btn" onclick="toggleMiniMode(false)">⊞ SALIR MINI</button>
+  <div id="countdown-stack"></div>
+  <nav role="navigation" aria-label="Navegación principal">
+    <div class="nav-btn active" id="nav-1" onclick="tab('sec-score',this)" role="tab" aria-selected="true" tabindex="0" aria-label="Marcador">MARCADOR <span class="nav-shortcut">[1]</span></div>
+    <div class="nav-btn" id="nav-2" onclick="tab('sec-cards',this)" role="tab" aria-selected="false" tabindex="0" aria-label="Sanciones">SANCIONES <span class="nav-shortcut">[2]</span></div>
+    <div class="nav-sep"></div>
+    <div class="nav-btn" id="nav-3" onclick="tab('sec-discord',this)" role="tab" aria-selected="false" tabindex="0" aria-label="Discord"><div id="dc-dot"></div>DISCORD <span class="nav-shortcut">[3]</span></div>
+    <div class="nav-btn" id="nav-4" onclick="tab('sec-report',this)" role="tab" aria-selected="false" tabindex="0" aria-label="Mensajes">MENSAJES <span class="nav-shortcut">[4]</span></div>
+    <div class="nav-btn" id="nav-5" onclick="tab('sec-export',this)" role="tab" aria-selected="false" tabindex="0" aria-label="Exportar">EXPORTAR <span class="nav-shortcut">[5]</span></div>
+    <div class="nav-sep"></div>
+    <div class="nav-btn" id="nav-6" onclick="tab('sec-settings',this)" title="Ajustes" style="flex:0 0 34px;font-size:14px;letter-spacing:0">⚙️</div>
+    <div class="nav-btn" id="nav-7" onclick="tab('sec-social',this)" title="Redes" style="flex:0 0 34px;font-size:14px;letter-spacing:0">🔗</div>
+    <div class="nav-btn exit-btn" onclick="location.reload()" role="button" aria-label="Salir de la aplicación" title="Salir">✕</div>
+  </nav>
+  <div class="content">
+
+    <!-- MARCADOR -->
+    <div id="sec-score" class="section active" role="tabpanel" aria-labelledby="nav-1" onmousedown="if(event.button===1){event.preventDefault();swapTeams()}">
+      <div id="session-title-score" style="display:flex;justify-content:center;align-items:center;gap:10px;font-size:clamp(13px,2vw,20px);font-weight:900;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:-4px">
+        <span id="lbl-red" class="red-glow">ROJO</span>
+        <span style="color:#3a2a5a;font-size:.7em">VS</span>
+        <span id="lbl-blue" class="blue-glow">AZUL</span>
+      </div>
+      <div class="score-container">
+        <div class="score-wrapper" role="group" aria-label="Marcador equipo rojo">
+          <div class="score" id="score-red" onclick="modScore('red',1)" oncontextmenu="modScore('red',-1);return false" role="button" tabindex="0" aria-label="Gol equipo rojo, clic derecho para restar">0</div>
+        </div>
+        <div class="center-controls">
+          <button id="period-btn">1T</button>
+          <button class="swap-btn" onclick="swapTeams()" title="Rotar equipos">⇄</button>
+        </div>
+        <div class="score-wrapper" role="group" aria-label="Marcador equipo azul">
+          <div class="score" id="score-blue" onclick="modScore('blue',1)" oncontextmenu="modScore('blue',-1);return false" role="button" tabindex="0" aria-label="Gol equipo azul, clic derecho para restar">0</div>
+        </div>
+      </div>
+      <div class="status-controls">
+        <button id="btn-resend-start" class="btn-resend" onclick="resendStart()" title="Reenviar inicio">↺</button>
+        <button id="btn-start" class="status-btn btn-start" onclick="setMatchStatus('start')" aria-live="polite" aria-atomic="true" aria-label="Iniciar o detener partido">INICIAR</button>
+        <button class="status-btn btn-ht" onclick="triggerHalfTimeStart()" title="Inicio medio tiempo">⏸ ½T</button>
+        <button class="status-btn btn-ht" onclick="triggerHalfTimeEnd()" title="Fin medio tiempo" style="color:#c084fc;border-color:#5b21b6!important">▶ ½T</button>
+        <button class="dc-end-btn" style="width:auto;padding:8px 18px;font-size:11px;letter-spacing:2px;border-radius:8px;margin-left:6px" onclick="triggerMatchEnd()">🏁 FIN</button>
+        <button id="btn-resend-end" class="btn-resend" style="display:none" onclick="resendEnd()" title="Reenviar final">↺</button>
+      </div>
+      <div style="display:flex;justify-content:center"><div class="time-log" id="time-log-display" aria-live="polite" aria-atomic="true">ESPERANDO INICIO…</div></div>
+      <div style="display:flex;justify-content:center;margin-top:4px">
+        <button class="cd-msgs-btn" id="msgs-fixed-btn" onclick="openMsgHistory()" style="font-size:11px;padding:5px 14px">📨 Mensajes enviados</button>
+      </div>
+    </div>
+
+    <!-- SANCIONES -->
+    <div id="sec-cards" class="section" role="tabpanel" aria-labelledby="nav-2">
+      <div class="row-flex">
+        <div class="col-flex" style="border-color:rgba(255,42,42,.18)">
+          <div class="col-header" style="color:var(--red)" id="cards-lbl-red">ROJO</div>
+          <div class="card-btn-row">
+            <button class="card-btn btn-yellow" onclick="promptEvent('red','TA')" aria-label="Tarjeta amarilla equipo rojo">🟨 TA</button>
+            <button class="card-btn btn-red" onclick="promptEvent('red','TR')" aria-label="Tarjeta roja equipo rojo">🟥 TR</button>
+          </div>
+          <div class="input-box" id="list-red"></div>
+        </div>
+        <div class="col-flex" style="border-color:rgba(42,140,255,.18)">
+          <div class="col-header" style="color:var(--blue)" id="cards-lbl-blue">AZUL</div>
+          <div class="card-btn-row">
+            <button class="card-btn btn-yellow" onclick="promptEvent('blue','TA')" aria-label="Tarjeta amarilla equipo azul">🟨 TA</button>
+            <button class="card-btn btn-red" onclick="promptEvent('blue','TR')" aria-label="Tarjeta roja equipo azul">🟥 TR</button>
+          </div>
+          <div class="input-box" id="list-blue"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCORD -->
+    <div id="sec-discord" class="section" role="tabpanel" aria-labelledby="nav-3">
+      <div class="dc-hero" style="flex-direction:column;align-items:center;padding:8px 0 12px;gap:8px">
+        <div style="position:relative;display:inline-flex;align-items:center;justify-content:center">
+          <div style="position:absolute;width:56px;height:56px;background:radial-gradient(circle,rgba(88,101,242,.35) 0%,transparent 70%);border-radius:50%;filter:blur(6px)"></div>
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="#5865f2" style="position:relative;filter:drop-shadow(0 0 14px rgba(88,101,242,.7))">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.03.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Webhook activo -->
+      <div class="dc-url-wrap">
+        <div class="dc-url-label">URL del Webhook activo</div>
+        <input type="text" id="dc-url-input" class="dc-url-input" placeholder="https://discord.com/api/webhooks/...">
+        <div class="dc-btn-row">
+          <button class="dc-btn dc-btn-check" onclick="checkWebhook()">COMPROBAR</button>
+          <button class="dc-btn dc-btn-connect" id="dc-connect-btn" onclick="toggleDiscordConnect()">CONECTAR</button>
+        </div>
+      </div>
+      <div class="dc-webhook-info" id="dc-webhook-info">
+        <div class="dc-wi-row"><span class="dc-wi-key">WEBHOOK</span><span class="dc-wi-val" id="dc-wi-name">—</span></div>
+        <div class="dc-wi-row"><span class="dc-wi-key">SERVIDOR</span><span class="dc-wi-val" id="dc-wi-guild">—</span></div>
+        <div class="dc-wi-row"><span class="dc-wi-key">CANAL ID</span><span class="dc-wi-val" id="dc-wi-channel">—</span></div>
+      </div>
+      <div class="dc-status-bar">
+        <div class="dc-status-dot" id="dc-status-dot"></div>
+        <div class="dc-status-txt" id="dc-status-txt">Sin conexión</div>
+      </div>
+
+      <!-- Perfiles guardados -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <div style="font-size:9px;font-weight:900;color:#3a2a5a;letter-spacing:2px;text-transform:uppercase">CANALES GUARDADOS</div>
+        <button onclick="addWebhookProfile()" style="background:transparent;border:1px solid #1a1030;color:#3a2a5a;font-size:10px;font-weight:900;padding:4px 12px;border-radius:6px;cursor:pointer;letter-spacing:1px;transition:.2s" onmouseover="this.style.color='#c084fc';this.style.borderColor='#2a1a40'" onmouseout="this.style.color='#3a2a5a';this.style.borderColor='#1a1030'">＋ AÑADIR</button>
+      </div>
+      <div id="dc-profiles-list" style="display:flex;flex-direction:column;gap:7px"></div>
+
+      <div class="dc-info-box">
+        ℹ️ &nbsp;<b>Eventos:</b> Inicio · ⏸ ½T · ▶ ½T · Gol · 🟨 TA · 🟥 TR · 🏁 Final<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Delay:</b> configurable en Ajustes · cancelable desde la barra superior.
+      </div>
+    </div>
+
+    <!-- MENSAJES -->
+    <div id="sec-report" class="section" role="tabpanel" aria-labelledby="nav-4">
+      <div style="font-size:10px;font-weight:900;color:#5a3a7a;letter-spacing:3px;text-transform:uppercase;margin-bottom:-4px">PERSONALIZAR MENSAJES</div>
+      <div class="we-grid" id="we-grid"></div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div id="sec-export" class="section" role="tabpanel" aria-labelledby="nav-5">
+      <div style="font-size:10px;font-weight:900;color:#5a3a7a;letter-spacing:3px;text-transform:uppercase">EXPORTAR / IMPORTAR</div>
+      <div style="display:flex;gap:10px">
+        <div style="display:flex;gap:8px;flex:1">
+          <button class="exp-btn exp-btn-all" style="flex:1;padding:10px 8px;font-size:11px" onclick="toggleSelectAll()">☑ TODO</button>
+          <button class="exp-btn exp-btn-import" style="flex:1;padding:10px 8px;font-size:11px" onclick="triggerImport()">⬆ IMPORTAR</button>
+        </div>
+        <button class="exp-btn exp-btn-dl" style="flex:1.4;font-size:13px" onclick="exportSelected()">⬇ EXPORTAR .TXT</button>
+      </div>
+      <div class="exp-list" id="exp-list"></div>
+      <input type="file" id="import-file" accept=".txt" style="display:none" onchange="handleImport(event)">
+    </div>
+
+    <!-- AJUSTES -->
+    <div id="sec-settings" class="section" style="overflow-y:auto;gap:14px" role="tabpanel" aria-labelledby="nav-6">
+      <div style="font-size:10px;font-weight:900;color:#5a3a7a;letter-spacing:3px;text-transform:uppercase">⚙️ AJUSTES</div>
+
+      <div style="background:#0a0a0a;border:1px solid #1a1a2a;border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-size:10px;font-weight:900;color:#3a2a5a;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid #1a1030;padding-bottom:8px">VARIABLES DE CONFIG.</div>
+
+        <!-- Delay -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Delay de envío</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Segundos antes de enviar el webhook</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="changeDelay(-1)" style="background:#0d0020;border:1px solid #2a1a40;color:#7c3aed;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">−</button>
+            <span id="delay-val" style="font-size:14px;font-weight:900;color:#c084fc;font-family:monospace;min-width:24px;text-align:center">10</span>
+            <button onclick="changeDelay(1)" style="background:#0d0020;border:1px solid #2a1a40;color:#7c3aed;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">+</button>
+          </div>
+        </div>
+
+        <!-- Ping interval -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Intervalo de ping</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Cada cuántos segundos verificar el webhook</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="changePingInterval(-10)" style="background:#07090f;border:1px solid #0d1020;color:#3a3d6a;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">−</button>
+            <span id="ping-interval-val" style="font-size:14px;font-weight:900;color:#5865f2;font-family:monospace;min-width:32px;text-align:center">30s</span>
+            <button onclick="changePingInterval(10)" style="background:#07090f;border:1px solid #0d1020;color:#3a3d6a;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">+</button>
+          </div>
+        </div>
+
+        <!-- Animación de gol tipo -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Tipo de animación</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Efecto del embed inicial al anotar</div>
+          </div>
+          <select id="goal-anim-type" onchange="setGoalAnimType(this.value)" style="background:#0d0020;border:1px solid #2a1a40;color:#c084fc;font-size:11px;font-weight:700;padding:5px 8px;border-radius:6px;cursor:pointer;outline:none">
+            <option value="simple">⚽ Simple</option>
+            <option value="reveal">GOOO⚽⚽⚽ Revelado</option>
+            <option value="bar">▱▱▱▱▱ Carga</option>
+            <option value="flash">💥 Flash</option>
+          </select>
+        </div>
+
+        <!-- Emoji/texto inicial personalizado -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Mensaje inicial gol</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Solo para animación Simple</div>
+          </div>
+          <input id="goal-init-msg" type="text" maxlength="32" value="⚽" onchange="setGoalInitMsg(this.value)" style="background:#000;border:1px solid #1a1a2a;color:#ccc;font-size:13px;border-radius:6px;padding:5px 10px;width:90px;text-align:center;outline:none;font-family:monospace">
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Modo mini</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Solo marcador e indicador de tiempo</div>
+          </div>
+          <label style="position:relative;display:inline-flex;align-items:center;cursor:pointer;flex-shrink:0">
+            <input type="checkbox" id="mini-mode-chk" onchange="toggleMiniMode(this.checked)" style="opacity:0;width:0;height:0;position:absolute">
+            <div id="mini-mode-track" style="width:38px;height:22px;background:#1a1030;border-radius:11px;transition:.25s;border:1px solid #2a1a40">
+              <div id="mini-mode-thumb" style="width:16px;height:16px;background:#3a2a5a;border-radius:50%;margin:2px;transition:.25s"></div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Animación de gol -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Animación de gol</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Balón flotante al anotar</div>
+          </div>
+          <label style="position:relative;display:inline-flex;align-items:center;cursor:pointer;flex-shrink:0" aria-label="Activar o desactivar animación de gol">
+            <input type="checkbox" id="goal-anim-chk" onchange="toggleGoalAnim(this.checked)" style="opacity:0;width:0;height:0;position:absolute" aria-label="Animación de gol">
+            <div id="goal-anim-track" style="width:38px;height:22px;background:#1a1030;border-radius:11px;transition:.25s;border:1px solid #2a1a40">
+              <div id="goal-anim-thumb" style="width:16px;height:16px;background:#3a2a5a;border-radius:50%;margin:2px;transition:.25s"></div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Tema -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Tema</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Oscuro / Claro</div>
+          </div>
+          <button id="theme-toggle-btn" class="setting-toggle-btn" onclick="toggleTheme()">🌙 OSCURO</button>
+        </div>
+
+        <!-- Idioma -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Idioma</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Interfaz en español / inglés</div>
+          </div>
+          <button id="lang-toggle-btn" class="setting-toggle-btn" onclick="toggleLang()">🇲🇽 ES</button>
+        </div>
+
+        <!-- Zoom general -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:12px;color:#aaa;font-weight:700">Zoom general</div>
+            <div style="font-size:10px;color:#3a2a5a;margin-top:2px">Escala de la interfaz · Ctrl + / −</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="changeZoom(-0.1)" style="background:#0d0020;border:1px solid #2a1a40;color:#7c3aed;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">−</button>
+            <span id="zoom-val" style="font-size:14px;font-weight:900;color:#c084fc;font-family:monospace;min-width:38px;text-align:center">100%</span>
+            <button onclick="changeZoom(0.1)" style="background:#0d0020;border:1px solid #2a1a40;color:#7c3aed;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;font-weight:900;line-height:1">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:10px;color:#2a1a40;text-align:center;letter-spacing:1px;padding-bottom:8px">HaxRef Pro V2.3 · by tutanka</div>
+    </div>
+
+    <!-- REDES -->
+    <div id="sec-social" class="section" style="overflow-y:auto;gap:14px" role="tabpanel" aria-labelledby="nav-7">
+      <div style="font-size:10px;font-weight:900;color:#5a3a7a;letter-spacing:3px;text-transform:uppercase">🔗 HAXREF PRO</div>
+      <div style="background:#0a0a0a;border:1px solid #1a1a2a;border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+
+        <a href="https://discord.gg/xaccYAEM2U" target="_blank" style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:#07090f;border:1px solid var(--discord-border);border-radius:10px;text-decoration:none;transition:.2s" onmouseover="this.style.borderColor='var(--discord)'" onmouseout="this.style.borderColor='var(--discord-border)'">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#5865f2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.03.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          <div>
+            <div style="font-size:12px;color:#5865f2;font-weight:700">Servidor de Discord</div>
+            <div style="font-size:10px;color:#2a2d5a;margin-top:2px">discord.gg/xaccYAEM2U</div>
+          </div>
+        </a>
+
+        <div onclick="copyDevUser()" style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:#07090f;border:1px solid #1a1a2a;border-radius:10px;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#3a2a5a'" onmouseout="this.style.borderColor='#1a1a2a'">
+          <span style="font-size:20px">👤</span>
+          <div style="flex:1">
+            <div style="font-size:12px;color:#aaa;font-weight:700">Developer</div>
+            <div id="dev-user-lbl" style="font-size:10px;color:#3a2a5a;margin-top:2px;font-family:monospace">tutanka4781 · clic para copiar</div>
+          </div>
+        </div>
+
+        <a href="https://www.youtube.com/@Tutanka4781" target="_blank" style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:#07090f;border:1px solid #1a1a2a;border-radius:10px;text-decoration:none;transition:.2s" onmouseover="this.style.borderColor='#ff2a2a'" onmouseout="this.style.borderColor='#1a1a2a'">
+          <span style="font-size:20px">▶️</span>
+          <div>
+            <div style="font-size:12px;color:#ff4444;font-weight:700">YouTube</div>
+            <div style="font-size:10px;color:#3a1a1a;margin-top:2px">@Tutanka4781</div>
+          </div>
+        </a>
+
+      </div>
+      <div style="font-size:10px;color:#2a1a40;text-align:center;letter-spacing:1px;padding-bottom:8px">HaxRef Pro V2.3 · by tutanka</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MSG HISTORY MODAL -->
+<div id="msg-history-modal">
+  <div class="mh-panel">
+    <div class="mh-head">
+      <span class="mh-title">📨 Mensajes enviados</span>
+      <button class="mh-close" onclick="closeMsgHistory()">✕</button>
+    </div>
+    <div class="mh-body" id="mh-body">
+      <div class="mh-empty">Sin mensajes en esta sesión</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let state = {
+  id:null, redName:"ROJO", blueName:"AZUL",
+  origRed:"ROJO", origBlue:"AZUL",
+  score:{red:0,blue:0}, origScore:{red:0,blue:0},
+  events:[], period:1,
+  startTime:null, endTime:null, inProgress:false,
+  players:{red:[],blue:[]}
+};
+let pendingContext   = null;
+let discordConnected = false;
+let webhookUrl       = '';
+let endSnapshot      = null;
+let msgHistory       = []; // {uid, dcId, label, timestamp, payload}
+let _msgSeq          = 1;  // ID aumentativo local único por sesión
+function _nextUid(){return _msgSeq++;}
+let _pingInterval    = null; // ping periódico al webhook
+
+// ══════════════════════════════════════════════════
+//  MODAL Y SANCIONES
+// ══════════════════════════════════════════════════
+const modal={
+  el:document.getElementById('modal-overlay'),
+  input:document.getElementById('modal-input'),
+  reason:document.getElementById('modal-reason'),
+  suggestions:document.getElementById('suggestions'),
+  callback:null,needsReason:false
+};
+modal.el.addEventListener('click', (e) => { if (e.target === modal.el) cancelModal(); });
+
+// ══════════════════════════════════════════════════
+//  COUNTDOWN QUEUE
+// ══════════════════════════════════════════════════
+let cdQueue=[], cdRunning=false, cdInterval=null, cdRemaining=0, cdCurrentCb=null;
+let cdDelay=parseInt(localStorage.getItem('haxref_delay')||'10');
+let pingIntervalSecs=parseInt(localStorage.getItem('haxref_ping_interval')||'30');
+let goalAnimEnabled=localStorage.getItem('haxref_goal_anim')!=='0';
+let goalAnimType=localStorage.getItem('haxref_goal_anim_type')||'simple';
+let goalInitMsg=localStorage.getItem('haxref_goal_init_msg')||'⚽';
+let miniModeEnabled=localStorage.getItem('haxref_mini_mode')==='1';
+let zoomScale=parseFloat(localStorage.getItem('haxref_zoom')||'1.0');
+let revertTimer = null;
+let _activeFastPing=false;
+
+// ── ZOOM NATIVO (sin distorsión) ──
+function _applyZoom(scale){
+  document.body.style.zoom = scale;
+  const el = document.getElementById('zoom-val');
+  if(el) el.textContent = Math.round(scale*100) + '%';
+  localStorage.setItem('haxref_zoom', scale);
+}
+
+function changeZoom(delta){
+  zoomScale = Math.max(0.5, Math.min(2.0, parseFloat((zoomScale + delta).toFixed(1))));
+  _applyZoom(zoomScale);
+}
+
+function revertZoom(){
+  zoomScale = 1.0;
+  _applyZoom(1.0);
+  const btn = document.getElementById('revert-zoom-btn');
+  if(btn) btn.style.display = 'none';
+  if(revertTimer) clearTimeout(revertTimer);
+}
+
+// Ctrl + rueda del ratón o Ctrl +/- como el navegador
+window.addEventListener('wheel', e => {
+  if(!e.ctrlKey) return;
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 0.1 : -0.1;
+  changeZoom(delta);
+}, {passive: false});
+
+// ── TEMA ──
+let lightMode = localStorage.getItem('haxref_light_mode') === '1';
+
+function _applyTheme(light){
+  document.body.classList.toggle('light-mode', light);
+  const btn = document.getElementById('theme-toggle-btn');
+  if(btn) btn.textContent = light ? '☀️ CLARO' : '🌙 OSCURO';
+}
+
+function toggleTheme(){
+  lightMode = !lightMode;
+  localStorage.setItem('haxref_light_mode', lightMode ? '1' : '0');
+  _applyTheme(lightMode);
+}
+
+// ── IDIOMA ──
+let currentLang = localStorage.getItem('haxref_lang') || 'es';
+
+const STRINGS = {
+  es: {
+    score:'MARCADOR', cards:'TARJETAS', discord:'DISCORD', report:'REPORTE',
+    export:'EXPORTAR', settings:'AJUSTES', social:'REDES',
+    red:'ROJO', blue:'AZUL', period1:'1ER TIEMPO', period2:'2DO TIEMPO',
+    start:'INICIAR', playing:'EN JUEGO', halfTime:'MEDIO TIEMPO',
+    langBtn:'🇲🇽 ES'
+  },
+  en: {
+    score:'SCOREBOARD', cards:'CARDS', discord:'DISCORD', report:'REPORT',
+    export:'EXPORT', settings:'SETTINGS', social:'LINKS',
+    red:'RED', blue:'BLUE', period1:'1ST HALF', period2:'2ND HALF',
+    start:'START', playing:'IN PLAY', halfTime:'HALF TIME',
+    langBtn:'🇺🇸 EN'
+  },
+  pt: {
+    score:'PLACAR', cards:'CARTÕES', discord:'DISCORD', report:'RELATÓRIO',
+    export:'EXPORTAR', settings:'CONFIG.', social:'LINKS',
+    red:'VERMELHO', blue:'AZUL', period1:'1º TEMPO', period2:'2º TEMPO',
+    start:'INICIAR', playing:'EM JOGO', halfTime:'INTERVALO',
+    langBtn:'🇧🇷 PT'
+  }
+};
+
+const LANG_CYCLE = ['es','en','pt'];
+
+function _applyLang(lang){
+  const s = STRINGS[lang] || STRINGS['es'];
+  // Nav labels — los nav-btn de texto tienen el texto como nodo directo antes del <span>
+  const navMap = {
+    'nav-1': s.score, 'nav-2': s.cards, 'nav-3': s.discord,
+    'nav-4': s.report, 'nav-5': s.export
+  };
+  Object.entries(navMap).forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    // Buscar el primer nodo de texto directo (no span)
+    el.childNodes.forEach(n => { if(n.nodeType===3 && n.textContent.trim()) n.textContent = txt + ' '; });
+  });
+  // Período
+  const pb = document.getElementById('period-btn');
+  if(pb && state) pb.textContent = state.period===1 ? s.period1 : s.period2;
+  // Botón idioma
+  const lb = document.getElementById('lang-toggle-btn');
+  if(lb) lb.textContent = s.langBtn;
+  // html lang attr
+  document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+}
+
+function toggleLang(){
+  const idx = LANG_CYCLE.indexOf(currentLang);
+  currentLang = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
+  localStorage.setItem('haxref_lang', currentLang);
+  _applyLang(currentLang);
+}
+
+function toggleMiniMode(on){
+  miniModeEnabled=on;
+  localStorage.setItem('haxref_mini_mode',on?'1':'0');
+  document.body.classList.toggle('mini-mode',on);
+  const chk=document.getElementById('mini-mode-chk');
+  const track=document.getElementById('mini-mode-track');
+  const thumb=document.getElementById('mini-mode-thumb');
+  if(chk)chk.checked=on;
+  if(track){track.style.background=on?'var(--purple-soft)':'#1a1030';track.style.borderColor=on?'var(--purple-soft)':'#2a1a40';}
+  if(thumb){thumb.style.background=on?'#fff':'#3a2a5a';thumb.style.transform=on?'translateX(16px)':'translateX(0)';}
+  if(on)tab('sec-score',document.getElementById('nav-1'));
+}
+
+function setGoalAnimType(val){
+  goalAnimType=val;
+  localStorage.setItem('haxref_goal_anim_type',val);
+  const inp=document.getElementById('goal-init-msg');
+  if(inp)inp.disabled=(val!=='simple');
+}
+
+function setGoalInitMsg(val){
+  goalInitMsg=val||'⚽';
+  localStorage.setItem('haxref_goal_init_msg',goalInitMsg);
+}
+
+function toggleGoalAnim(on){
+  goalAnimEnabled=on;
+  localStorage.setItem('haxref_goal_anim',on?'1':'0');
+  const track=document.getElementById('goal-anim-track');
+  const thumb=document.getElementById('goal-anim-thumb');
+  if(track){track.style.background=on?'var(--purple-soft)':'#1a1030';track.style.borderColor=on?'var(--purple-soft)':'#2a1a40';}
+  if(thumb){thumb.style.background=on?'#fff':'#3a2a5a';thumb.style.transform=on?'translateX(16px)':'translateX(0)';}
+}
+
+function enqueueCountdown(label,cb){ cdQueue.push({label,cb}); if(!cdRunning) _processQueue(); }
+
+function _processQueue(){
+  if(!cdQueue.length){cdRunning=false;_renderStack();return;}
+  cdRunning=true; cdRemaining=cdDelay; cdCurrentCb=cdQueue[0].cb; _renderStack();
+  cdInterval=setInterval(()=>{
+    cdRemaining--; _renderStack();
+    if(cdRemaining<=0){
+      clearInterval(cdInterval);cdInterval=null;
+      const cb=cdCurrentCb;cdCurrentCb=null;cdQueue.shift();
+      if(cb)cb(); _processQueue();
+    }
+  },1000);
+}
+
+function changeDelay(delta){
+  cdDelay=Math.max(3,Math.min(30,cdDelay+delta));
+  localStorage.setItem('haxref_delay',cdDelay);
+  const el=document.getElementById('delay-val');
+  if(el)el.textContent=cdDelay;
+}
+
+function changePingInterval(delta){
+  pingIntervalSecs=Math.max(10,Math.min(120,pingIntervalSecs+delta));
+  localStorage.setItem('haxref_ping_interval',pingIntervalSecs);
+  const el=document.getElementById('ping-interval-val');
+  if(el)el.textContent=pingIntervalSecs+'s';
+  // Reiniciar ping con nuevo intervalo si está conectado
+  if(discordConnected)_startPing();
+}
+
+
+
+function cancelCurrent(){
+  if(cdInterval){clearInterval(cdInterval);cdInterval=null;}
+  // P5: limpiar estado ANTES de llamar _processQueue para evitar frame inconsistente
+  cdCurrentCb=null;
+  cdQueue.shift();
+  cdRunning=false;
+  _renderStack();
+  if(cdQueue.length)_processQueue();
+}
+function sendNow(){
+  if(cdInterval){clearInterval(cdInterval);cdInterval=null;}
+  const cb=cdCurrentCb;cdCurrentCb=null;cdQueue.shift();cdRunning=false;
+  if(cb)cb();_processQueue();
+}
+function _renderStack(){
+  const stack=document.getElementById('countdown-stack');
+  stack.innerHTML='';
+  if(!cdQueue.length)return;
+  const item=cdQueue[0];
+  const pct=(cdRemaining/10*100).toFixed(1);
+  const extra=cdQueue.length>1?` <span style="color:#2a1d5a">(+${cdQueue.length-1} en cola)</span>`:'';
+  const bar=document.createElement('div');
+  bar.className='cd-bar';
+  bar.innerHTML=`
+    <div class="cd-label">${item.label}${extra}</div>
+    <div class="cd-track"><div class="cd-fill" style="width:${pct}%;transition:width 1s linear"></div></div>
+    <div class="cd-num">${cdRemaining}</div>
+    <button class="cd-send" onclick="sendNow()">ENVIAR</button>
+    <button class="cd-cancel" onclick="cancelCurrent()">CANCELAR</button>
+    <button class="cd-msgs-btn${msgHistory.length?' has-msgs':''}" onclick="openMsgHistory()">📨${msgHistory.length?` ${msgHistory.length}`:''}</button>`;
+  stack.appendChild(bar);
+}
+
+// ══════════════════════════════════════════════════
+//  DISCORD HELPERS
+// ══════════════════════════════════════════════════
+async function sendEmbed(payload){
+  if(!webhookUrl)return null;
+  try{
+    const r=await fetch(webhookUrl+'?wait=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[payload]})});
+    if(!r.ok){
+      const errText=await r.text().catch(()=>'');
+      showAlert(`⚠️ Error al enviar mensaje a Discord.\nCódigo: ${r.status}${errText?'\n'+errText.slice(0,120):''}`);
+      return null;
+    }
+    const d=await r.json().catch(()=>null);
+    return d?d.id:null;
+  }catch(e){
+    showAlert(`⚠️ No se pudo conectar con Discord.\n${e.message||'Error de red'}`);
+    return null;
+  }
+}
+async function patchEmbed(id,payload){
+  if(!webhookUrl||!id)return;
+  try{await fetch(webhookUrl+'/messages/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[payload]})});}catch(e){}
+}
+async function deleteMsg(id){
+  if(!webhookUrl||!id)return;
+  try{await fetch(webhookUrl+'/messages/'+id,{method:'DELETE'});}catch(e){}
+}
+
+// ── MSG HISTORY ──
+function _nowHHMM(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+const _nowHora=_nowHHMM; // alias — misma función
+function _updateMsgsBtn(){
+  const btn=document.getElementById('msgs-fixed-btn');
+  if(!btn)return;
+  const n=msgHistory.length;
+  btn.textContent=n?`📨 Mensajes (${n})`:'📨 Mensajes enviados';
+  btn.classList.toggle('has-msgs',n>0);
+}
+function _addMsgHistory(dcId,label,payload){
+  if(!dcId)return;
+  const uid=_nextUid();
+  msgHistory.push({uid,dcId,label,timestamp:_nowHHMM(),payload:payload||null});
+  _updateMsgsBtn();
+  _renderStack();
+  return uid;
+}
+// Buscar entrada por uid
+function _getMsgByUid(uid){return msgHistory.find(m=>m.uid===uid)||null;}
+// Eliminar del historial por uid (sin borrar de Discord)
+function _removeMsgByUid(uid){
+  msgHistory=msgHistory.filter(m=>m.uid!==uid);
+  _updateMsgsBtn();_renderStack();_renderMsgHistory();
+}
+function openMsgHistory(){
+  _renderMsgHistory();
+  document.getElementById('msg-history-modal').style.display='flex';
+}
+function closeMsgHistory(){
+  document.getElementById('msg-history-modal').style.display='none';
+}
+function _renderMsgHistory(){
+  const body=document.getElementById('mh-body');
+  if(!msgHistory.length){body.innerHTML='<div class="mh-empty">Sin mensajes en esta sesión</div>';return;}
+  body.innerHTML=msgHistory.map(m=>`
+    <div class="mh-row" id="mh-row-${m.uid}">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="mh-label">${m.label}</span>
+          <span class="mh-time">${m.timestamp}</span>
+        </div>
+        <textarea class="mh-edit-area" id="mh-edit-${m.uid}" rows="2" placeholder="Editar título del embed…" style="width:100%;background:#000;border:1px solid #1a1030;border-radius:6px;padding:6px 8px;color:#aaa;font-size:11px;font-family:monospace;resize:vertical;outline:none;transition:.2s" onfocus="this.style.borderColor='var(--discord)'" onblur="this.style.borderColor='#1a1030'">${m.editTitle||m.label}</textarea>
+        <div style="display:flex;gap:6px;justify-content:flex-end">
+          <button class="mh-del" onclick="confirmMsgEdit(${m.uid})" style="color:var(--discord);border-color:var(--discord-border)">✓ CONFIRMAR</button>
+          <button class="mh-del" onclick="deleteMsgRow(${m.uid})" title="Borrar de Discord">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function confirmMsgEdit(uid){
+  const m=_getMsgByUid(uid);
+  if(!m)return;
+  const ta=document.getElementById(`mh-edit-${uid}`);
+  if(!ta)return;
+  const newTitle=ta.value.trim();
+  if(!newTitle)return;
+  m.editTitle=newTitle;
+  // Patch en Discord — conservar color del payload original
+  const color=m.payload?.color||0x5865f2;
+  await patchEmbed(m.dcId,{title:newTitle,color});
+  ta.style.borderColor='#1a3a1a';ta.style.color='#4caf50';
+  setTimeout(()=>{ta.style.borderColor='#1a1030';ta.style.color='#aaa';},1200);
+}
+async function deleteMsgRow(uid){
+  const m=_getMsgByUid(uid);
+  if(!m)return;
+  await deleteMsg(m.dcId).catch(()=>{});
+  _removeMsgByUid(uid);
+}
+document.getElementById('msg-history-modal').addEventListener('click',function(e){if(e.target===this)closeMsgHistory();});
+
+async function fetchWebhookInfo(url){
+  // GET al webhook sin ?wait devuelve info del webhook
+  try{
+    const r=await fetch(url);
+    if(!r.ok)return null;
+    return await r.json();
+  }catch(e){return null;}
+}
+
+async function checkWebhook(){
+  const url=document.getElementById('dc-url-input').value.trim();
+  if(!url){showAlert('Ingresa una URL de webhook primero.');return;}
+  const btn=document.querySelector('.dc-btn-check');
+  btn.textContent='...';
+  try{
+    const r=await fetch(url+'?wait=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title:'Comprobando webhook…',description:'Se elimina en 15 s.',color:5793266}]})});
+    if(r.ok){
+      const d=await r.json();
+      btn.textContent='✓ OK';
+      if(d?.id)setTimeout(()=>deleteMsg(d.id),15000);
+    }else{
+      const errText=await r.text().catch(()=>'');
+      btn.textContent='✗ ERROR';
+      showAlert(`⚠️ No se pudo verificar el webhook.\nCódigo: ${r.status}${errText?'\n'+errText.slice(0,120):''}`);
+    }
+  }catch(e){
+    btn.textContent='✗ ERROR';
+    showAlert(`⚠️ Error de conexión al verificar el webhook.\n${e.message||'Error de red'}`);
+  }
+  setTimeout(()=>btn.textContent='COMPROBAR',2500);
+}
+
+async function toggleDiscordConnect(){
+  const url=document.getElementById('dc-url-input').value.trim();
+  if(!discordConnected){
+    if(!url){showAlert('Ingresa una URL de webhook para conectar.');return;}
+    if(!url.startsWith('https://discord.com/api/webhooks/')){showAlert('URL no válida. Debe ser un webhook de Discord.');return;}
+    const info=await fetchWebhookInfo(url);
+    webhookUrl=url;discordConnected=true;
+    // Guardar como perfil si no existe ya
+    const profiles=_getProfiles();
+    let existing=profiles.find(p=>p.url===url);
+    if(!existing){
+      const name=info?.name||'Canal '+( profiles.length+1);
+      existing={id:'p_'+Date.now(),name,url};
+      profiles.push(existing);
+      _saveProfiles(profiles);
+    }
+    _setActiveProfileId(existing.id);
+    if(info){
+      document.getElementById('dc-wi-name').textContent    = info.name    || '—';
+      document.getElementById('dc-wi-guild').textContent   = info.guild_id ? `ID ${info.guild_id}` : '—';
+      document.getElementById('dc-wi-channel').textContent = info.channel_id || '—';
+      document.getElementById('dc-webhook-info').classList.add('visible');
+    }
+  }else{
+    discordConnected=false;webhookUrl='';
+    _setActiveProfileId(null);
+    document.getElementById('dc-webhook-info').classList.remove('visible');
+  }
+  updateDiscordUI();
+  renderProfilesList();
+}
+
+// P3: deshabilita visualmente los botones de reenvío si no hay webhook activo
+function updateResendUI(){
+  const btns=[document.getElementById('btn-resend-start'),document.getElementById('btn-resend-end')];
+  btns.forEach(b=>{
+    if(!b)return;
+    b.style.opacity=discordConnected?'1':'0.3';
+    b.style.pointerEvents=discordConnected?'auto':'none';
+    b.title=discordConnected?b.title:'Conecta el webhook para reenviar';
+  });
+}
+
+function updateDiscordUI(){
+  const dot=document.getElementById('dc-status-dot'),txt=document.getElementById('dc-status-txt');
+  const btn=document.getElementById('dc-connect-btn'),nd=document.getElementById('dc-dot');
+  if(discordConnected){
+    dot.classList.add('on');txt.classList.add('on');txt.textContent='Conectado';
+    btn.textContent='DESCONECTAR';btn.classList.add('connected');nd.classList.add('on');
+    _startPing();
+  }else{
+    dot.classList.remove('on');txt.classList.remove('on');txt.textContent='Sin conexión';
+    btn.textContent='CONECTAR';btn.classList.remove('connected');nd.classList.remove('on');
+    _stopPing();
+  }
+  updateResendUI();
+}
+
+let _pingInFlight=false;
+function _startPing(){
+  _stopPing();
+  _pingInterval=setInterval(async()=>{
+    if(!webhookUrl||!discordConnected||_pingInFlight)return;
+    _pingInFlight=true;
+    try{
+      const r=await fetch(webhookUrl,{method:'GET'});
+      const dot=document.getElementById('dc-status-dot');
+      const txt=document.getElementById('dc-status-txt');
+      if(r.ok){
+        dot.style.background='';dot.style.boxShadow='';
+        dot.classList.add('on');
+        txt.textContent='Conectado';txt.classList.add('on');txt.style.color='';
+      }else{
+        dot.classList.remove('on');
+        dot.style.background='#ff6b2a';dot.style.boxShadow='0 0 8px rgba(255,107,42,.7)';
+        txt.textContent=`Error ${r.status}`;txt.classList.remove('on');txt.style.color='#ff6b2a';
+      }
+    }catch(e){
+      const dot=document.getElementById('dc-status-dot');
+      const txt=document.getElementById('dc-status-txt');
+      dot.classList.remove('on');
+      dot.style.background='#ff2a2a';dot.style.boxShadow='0 0 8px rgba(255,42,42,.6)';
+      txt.textContent='Sin conexión';txt.classList.remove('on');txt.style.color='var(--red)';
+    }finally{_pingInFlight=false;}
+  },(_activeFastPing?2:pingIntervalSecs)*1000);
+}
+
+function _stopPing(){
+  if(_pingInterval){clearInterval(_pingInterval);_pingInterval=null;}
+  // Resetear estilos inline del dot/txt
+  const dot=document.getElementById('dc-status-dot');
+  const txt=document.getElementById('dc-status-txt');
+  if(dot){dot.style.background='';dot.style.boxShadow='';}
+  if(txt){txt.style.color='';}
+}
+
+// ══════════════════════════════════════════════════
+//  WEBHOOK TEMPLATES — variables simplificadas
+// ══════════════════════════════════════════════════
+const defaultTemplates={
+  start:   {title:'¡Inicia el partido! {teamred} 🆚 {teamblue} · {hora}',                                   color:'#57f287'},
+  ht_start:{title:'⏸️ Medio tiempo — {teamred} {scorered} - {scoreblue} {teamblue} · {hora}',               color:'#9d00ff'},
+  ht_end:  {title:'▶️ ¡Comienza la 2T! {teamred} {scorered} - {scoreblue} {teamblue} · {hora}',             color:'#7c3aed'},
+  goal:    {title:'⚽ GOL de {team} · {teamred} {scorered} - {scoreblue} {teamblue} · {hora}',               color:'#2a8cff'},
+  ta:      {title:'🟨 Tarjeta amarilla · {player} ({team}) · {hora}',                                        color:'#ffcc00'},
+  tr:      {title:'🟥 Tarjeta roja · {player} ({team}) · {hora}',                                            color:'#ff2a2a'},
+  end:     {title:'🏁 Fin — {teamred} {scorered} - {scoreblue} {teamblue} · {recuentohora}',                 color:'#e74c3c'}
+};
+
+const templateDefs=[
+  {key:'start',    icon:'🟢', label:'Inicio de partido',    vars:'{teamred} · {teamblue} · {hora}'},
+  {key:'ht_start', icon:'⏸️', label:'Inicio medio tiempo',  vars:'{teamred} · {teamblue} · {scorered} · {scoreblue} · {hora}'},
+  {key:'ht_end',   icon:'▶️', label:'Inicio 2ª parte',      vars:'{teamred} · {teamblue} · {scorered} · {scoreblue} · {hora}'},
+  {key:'goal',     icon:'⚽', label:'Gol',                  vars:'{team} · {teamred} · {teamblue} · {scorered} · {scoreblue} · {hora}'},
+  {key:'ta',       icon:'🟨', label:'Tarjeta amarilla',     vars:'{player} · {team} · {reason} · {hora}'},
+  {key:'tr',       icon:'🟥', label:'Tarjeta roja',         vars:'{player} · {team} · {reason} · {hora}'},
+  {key:'end',      icon:'🏁', label:'Final de partido',     vars:'{teamred} · {teamblue} · {scorered} · {scoreblue} · {recuentohora}'}
+];
+
+let templates=JSON.parse(localStorage.getItem('haxref_templates')||'null')||JSON.parse(JSON.stringify(defaultTemplates));
+// Migrar keys nuevas si faltan
+Object.keys(defaultTemplates).forEach(k=>{if(!templates[k])templates[k]=JSON.parse(JSON.stringify(defaultTemplates[k]));});
+// Migrar títulos desactualizados (si coinciden con versiones antiguas conocidas, aplicar el nuevo por defecto)
+const _oldTitles={
+  ht_end:'▶️ ¡Comienza la 2T! {teamred} 🆚 {teamblue}',
+  ta:'🟨 Tarjeta amarilla · {player}',
+  tr:'🟥 Tarjeta roja · {player}',
+  end:'🏁 Fin del partido — {teamred} {scorered} - {scoreblue} {teamblue}',
+  start:'¡Inicia el partido! {teamred} 🆚 {teamblue}'
+};
+Object.entries(_oldTitles).forEach(([k,old])=>{if(templates[k]&&templates[k].title===old)templates[k].title=defaultTemplates[k].title;});
+
+function hexToDec(hex){return parseInt(hex.replace('#',''),16);}
+function applyVars(str,vars){return str.replace(/\{(\w+)\}/g,(_,k)=>vars[k]!==undefined?vars[k]:`{${k}}`);}
+
+function syncColorLbl(key){
+  document.getElementById(`we-colorlbl-${key}`).textContent=document.getElementById(`we-color-${key}`).value.toUpperCase();
+}
+function saveTemplate(key,btn){
+  const t=document.getElementById(`we-title-${key}`).value.trim();
+  const c=document.getElementById(`we-color-${key}`).value;
+  if(t)templates[key].title=t;
+  templates[key].color=c;
+  localStorage.setItem('haxref_templates',JSON.stringify(templates));
+  // Forzar reconstrucción del grid en próxima visita
+  const grid=document.getElementById('we-grid');
+  if(grid)grid.innerHTML='';
+  buildWeGrid();
+  btn.textContent='✓ GUARDADO';btn.classList.add('saved');
+  setTimeout(()=>{btn.textContent='GUARDAR';btn.classList.remove('saved');},1500);
+}
+
+function buildWeGrid(){
+  const grid=document.getElementById('we-grid');
+  if(!grid)return;
+  // Lazy: solo reconstruir si está vacío o se fuerza
+  if(grid.children.length>0)return;
+  grid.innerHTML=templateDefs.map(({key,icon,label,vars})=>{
+    const t=templates[key];
+    const varChips=vars.split(' · ').map(v=>`<span class="we-var-chip" onclick="copyVar('${v}',this)" title="Copiar">${v}</span>`).join('');
+    return `<div class="we-card">
+      <div class="we-card-header"><span class="we-icon">${icon}</span><span class="we-label">${label}</span></div>
+      <div class="we-row">
+        <input class="we-input" id="we-title-${key}" value="${t.title.replace(/"/g,'&quot;')}" maxlength="120">
+      </div>
+      <div class="we-row-actions">
+        <div class="we-color-wrap" onclick="document.getElementById('we-color-${key}').click()">
+          <input type="color" id="we-color-${key}" value="${t.color}" oninput="syncColorLbl('${key}')" onclick="event.stopPropagation()" style="pointer-events:none">
+          <span class="we-color-lbl" id="we-colorlbl-${key}">${t.color.toUpperCase()}</span>
+        </div>
+        <button class="we-test-btn" onclick="testTemplate('${key}',this)">TEST</button>
+        <button class="we-save-btn" onclick="saveTemplate('${key}',this)">GUARDAR</button>
+      </div>
+      <div class="we-vars">${varChips}</div>
+    </div>`;
+  }).join('');
+}
+
+function copyVar(v,el){
+  navigator.clipboard.writeText(v).catch(()=>{});
+  el.classList.add('copied');
+  const orig=el.textContent;
+  el.textContent='✓';
+  setTimeout(()=>{el.textContent=orig;el.classList.remove('copied');},900);
+}
+
+// Variables de prueba
+const testVars={
+  start:   {teamred:'ROJO',teamblue:'AZUL',hora:'20:00'},
+  ht_start:{teamred:'ROJO',teamblue:'AZUL',scorered:'1',scoreblue:'0',hora:'20:22'},
+  ht_end:  {teamred:'ROJO',teamblue:'AZUL',scorered:'1',scoreblue:'0',hora:'20:27'},
+  goal:    {team:'ROJO',teamred:'ROJO',teamblue:'AZUL',scorered:'2',scoreblue:'1',hora:'20:30'},
+  ta:      {player:'Jugador',team:'ROJO',reason:'Falta técnica',hora:'20:15'},
+  tr:      {player:'Jugador',team:'AZUL',reason:'Expulsión',hora:'20:40'},
+  end:     {teamred:'ROJO',teamblue:'AZUL',scorered:'2',scoreblue:'1',recuentohora:'20:00 → 20:45',hora:'20:45'}
+};
+
+async function testTemplate(key,btn){
+  if(!webhookUrl){showAlert('Conecta el webhook primero.');return;}
+  const titleVal=document.getElementById(`we-title-${key}`).value.trim()||templates[key].title;
+  const color=document.getElementById(`we-color-${key}`).value;
+  const title=applyVars(titleVal,testVars[key]);
+  btn.textContent='...';btn.classList.add('testing');
+  try{
+    if(key==='goal'){
+      const r=await fetch(webhookUrl+'?wait=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title:'⚽',color:hexToDec(color)}]})});
+      if(r.ok){
+        const d=await r.json();btn.textContent='✓ OK';
+        if(d?.id){
+          setTimeout(()=>patchEmbed(d.id,{title,description:'*(prueba — se borra en 15s)*',color:hexToDec(color)}),1200);
+          setTimeout(()=>deleteMsg(d.id),15000);
+        }
+      }else{
+        const errText=await r.text().catch(()=>'');
+        btn.textContent='✗ ERROR';
+        showAlert(`⚠️ Error al testear webhook.\nCódigo: ${r.status}${errText?'\n'+errText.slice(0,120):''}`);
+      }
+    }else{
+      const r=await fetch(webhookUrl+'?wait=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title,description:'*(prueba — se borra en 15s)*',color:hexToDec(color)}]})});
+      if(r.ok){const d=await r.json();btn.textContent='✓ OK';if(d?.id)setTimeout(()=>deleteMsg(d.id),15000);}
+      else{
+        const errText=await r.text().catch(()=>'');
+        btn.textContent='✗ ERROR';
+        showAlert(`⚠️ Error al testear webhook.\nCódigo: ${r.status}${errText?'\n'+errText.slice(0,120):''}`);
+      }
+    }
+  }catch(e){
+    btn.textContent='✗ ERROR';
+    showAlert(`⚠️ No se pudo conectar con Discord.\n${e.message||'Error de red'}`);
+  }
+  setTimeout(()=>{btn.textContent='TEST';btn.classList.remove('testing');},2500);
+}
+
+// ══════════════════════════════════════════════════
+//  PAYLOADS
+// ══════════════════════════════════════════════════
+function _scoreVars(){
+  return {teamred:state.origRed,teamblue:state.origBlue,scorered:state.origScore.red,scoreblue:state.origScore.blue};
+}
+
+function buildStartPayload(){
+  const t=templates.start;
+  return {title:applyVars(t.title,{teamred:state.origRed,teamblue:state.origBlue,hora:_nowHora()}),color:hexToDec(t.color)};
+}
+function buildHtStartPayload(){
+  const t=templates.ht_start;
+  return {title:applyVars(t.title,{..._scoreVars(),hora:_nowHora()}),color:hexToDec(t.color)};
+}
+function buildHtEndPayload(){
+  const t=templates.ht_end;
+  return {title:applyVars(t.title,{..._scoreVars(),hora:_nowHora()}),color:hexToDec(t.color)};
+}
+function buildCardPayload(type,player,tName,reason){
+  const t=templates[type.toLowerCase()];
+  const title=applyVars(t.title,{player,team:tName,reason:reason||'',hora:_nowHora()});
+  const titleHasTeam=title.includes(tName);
+  let desc='';
+  if(!titleHasTeam) desc+=`**Equipo:** ${tName}`;
+  // No repetir reason si ya está en el título
+  const titleHasReason=reason&&title.includes(reason);
+  if(reason&&!titleHasReason) desc+=(desc?'\n':'')+`**Motivo:** ${reason}`;
+  return {title,description:desc||undefined,color:hexToDec(t.color)};
+}
+function buildEndPayloadFromSnap(snap){
+  const t=templates.end;
+  const recuentohora=`${snap.startTime||'?'} → ${snap.endTime||'?'}`;
+  const title=applyVars(t.title,{
+    teamred:snap.origRed,teamblue:snap.origBlue,
+    scorered:snap.origScore.red,scoreblue:snap.origScore.blue,
+    recuentohora,hora:snap.endTime||_nowHora()
+  });
+  let desc=`⏱ ${recuentohora}\n`;
+  const cards=snap.events.filter(e=>e.type==='TA'||e.type==='TR');
+  if(cards.length){
+    desc+='\n**Tarjetas:**\n';
+    cards.forEach(e=>{
+      const icon=e.type==='TA'?'🟨':'🟥';
+      const tn=e.teamName||(e.team==='red'?snap.origRed:snap.origBlue);
+      desc+=`${icon} ${e.player} (${tn})${e.wasDouble?' (2TA→TR)':''}${e.reason?` — ${e.reason}`:''}\n`;
+    });
+  }
+  return {title,description:desc.trim(),color:hexToDec(t.color)};
+}
+
+// ══════════════════════════════════════════════════
+//  EVENTOS DISCORD
+// ══════════════════════════════════════════════════
+function queueMatchStart(){
+  if(!discordConnected)return;
+  const p=buildStartPayload();
+  enqueueCountdown('🟢 Inicio — enviando…',async()=>{const id=await sendEmbed(p);_addMsgHistory(id,'🟢 Inicio',p);});
+}
+function resendStart(){
+  if(!discordConnected){showAlert('Conecta el webhook primero.');return;}
+  const p=buildStartPayload();
+  enqueueCountdown('🟢 Reenvío inicio…',async()=>{const id=await sendEmbed(p);_addMsgHistory(id,'🟢 Reenvío inicio',p);});
+}
+function resendEnd(){
+  if(!discordConnected){showAlert('Conecta el webhook primero.');return;}
+  if(!endSnapshot){showAlert('Finaliza el partido primero.');return;}
+  const p=buildEndPayloadFromSnap(endSnapshot);
+  enqueueCountdown('🏁 Reenvío final…',async()=>{const id=await sendEmbed(p);_addMsgHistory(id,'🏁 Reenvío final',p);});
+}
+
+function triggerHalfTimeStart(){
+  if(!state.inProgress){showAlert('Inicia el partido antes de marcar el medio tiempo.');return;}
+  showConfirm(
+    '⏸ ¿Iniciar medio tiempo?\nLos equipos se rotarán automáticamente.',
+    ()=>{
+      const htPayload=buildHtStartPayload();
+      state.inProgress=false; // marcar medio tiempo
+      swapTeams();
+      updateTimeUI();updatePeriodUI();
+      if(discordConnected){
+        enqueueCountdown('⏸️ Inicio ½T — enviando…',async()=>{const id=await sendEmbed(htPayload);_addMsgHistory(id,'⏸️ Inicio ½T',htPayload);});
+      }
+    },
+    ()=>{},
+    'CONFIRMAR','CANCELAR'
+  );
+}
+
+function triggerHalfTimeEnd(){
+  state.inProgress=true;
+  updateTimeUI();updatePeriodUI();
+  if(discordConnected){
+    const p=buildHtEndPayload();
+    enqueueCountdown('▶️ Fin ½T — enviando…',async()=>{const id=await sendEmbed(p);_addMsgHistory(id,'▶️ Fin ½T',p);});
+  }
+}
+
+function triggerMatchEnd(){
+  if(!state.startTime){showAlert('El partido no ha iniciado todavía.');return;}
+  if(state.endTime){showAlert('El partido ya está finalizado.');return;}
+  showConfirm(
+    `¿Finalizar el partido?\n${state.origRed} ${state.origScore.red} - ${state.origScore.blue} ${state.origBlue}\n\nEsta acción no se puede deshacer.`,
+    ()=>{
+      setMatchStatus('end');
+      document.getElementById('btn-resend-end').style.display='';
+      if(discordConnected){
+        const p=buildEndPayloadFromSnap(endSnapshot);
+        enqueueCountdown('🏁 Final — enviando…',async()=>{const id=await sendEmbed(p);_addMsgHistory(id,'🏁 Final',p);});
+      }
+    },
+    ()=>{},
+    'FINALIZAR','CANCELAR'
+  );
+}
+
+// ══════════════════════════════════════════════════
+//  TECLADO
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  // No activar shortcuts si hay un input o textarea enfocado
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(document.getElementById('modal-overlay').style.display==='flex')return;
+  if(document.getElementById('generic-modal').style.display==='flex')return;
+  // Zoom con teclado (Ctrl + / Ctrl -)
+  if(e.ctrlKey && (e.key==='=' || e.key==='+' || e.key==='NumpadAdd')){e.preventDefault();changeZoom(0.1);return;}
+  if(e.ctrlKey && (e.key==='-' || e.key==='NumpadSubtract')){e.preventDefault();changeZoom(-0.1);return;}
+  if(e.ctrlKey && e.key==='0'){e.preventDefault();zoomScale=1.0;_applyZoom(1.0);return;}
+  if(!e.ctrlKey){
+    if(e.key==='1')tab('sec-score',  document.getElementById('nav-1'));
+    if(e.key==='2')tab('sec-cards',  document.getElementById('nav-2'));
+    if(e.key==='3')tab('sec-discord',document.getElementById('nav-3'));
+    if(e.key==='4')tab('sec-report', document.getElementById('nav-4'));
+    if(e.key==='5')tab('sec-export', document.getElementById('nav-5'));
+  }
+});
+let ctrlActive=false,ctrlTimeout=null;
+const keysBlue=['1','Numpad1','.',','],keysRed=['2','Numpad2','-','0'];
+window.addEventListener('keydown',e=>{
+  // No activar si hay input enfocado
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(e.key==='Control'){ctrlActive=true;clearTimeout(ctrlTimeout);ctrlTimeout=setTimeout(()=>ctrlActive=false,1000);return;}
+  if(ctrlActive){
+    let hit=false;
+    if(keysBlue.includes(e.key)){modScore('blue',1);hit=true;}
+    else if(keysRed.includes(e.key)){modScore('red',1);hit=true;}
+    if(hit){ctrlActive=false;clearTimeout(ctrlTimeout);e.preventDefault();e.stopImmediatePropagation();}
+  }
+},true);
+
+// ══════════════════════════════════════════════════
+//  WEBHOOK PROFILES
+// ══════════════════════════════════════════════════
+function _getProfiles(){return JSON.parse(localStorage.getItem('haxref_wh_profiles')||'[]');}
+function _saveProfiles(p){localStorage.setItem('haxref_wh_profiles',JSON.stringify(p));}
+function _getActiveProfileId(){return localStorage.getItem('haxref_wh_active')||null;}
+function _setActiveProfileId(id){if(id)localStorage.setItem('haxref_wh_active',id);else localStorage.removeItem('haxref_wh_active');}
+
+// Migración: si existe el webhook legacy, convertirlo en perfil
+function _migrateOldWebhook(){
+  const old=localStorage.getItem('haxref_webhook');
+  if(!old)return;
+  const profiles=_getProfiles();
+  if(!profiles.find(p=>p.url===old)){
+    profiles.unshift({id:'p_'+Date.now(),name:'Canal principal',url:old});
+    _saveProfiles(profiles);
+    if(!_getActiveProfileId())_setActiveProfileId(profiles[0].id);
+  }
+  localStorage.removeItem('haxref_webhook');
+}
+
+// ── MODAL DE SELECCIÓN AL INICIO ──
+let _whpOnSelect=null;
+
+async function showProfileSelector(onSelect){
+  _migrateOldWebhook();
+  _whpOnSelect=onSelect;
+  const profiles=_getProfiles();
+  const list=document.getElementById('whp-list');
+  const modal=document.getElementById('wh-profiles-modal');
+
+  if(!profiles.length){
+    // Sin perfiles guardados — ir directo sin webhook
+    onSelect(null,false);
+    return;
+  }
+
+  // Renderizar items con spinner
+  list.innerHTML=profiles.map(p=>`
+    <div class="whp-item" id="whp-item-${p.id}" role="button" tabindex="0" onclick="_whpClose('${p.id}',false)" onkeydown="if(event.key==='Enter'||event.key===' ')_whpClose('${p.id}',false)">
+      <div class="whp-dot checking" id="whp-dot-${p.id}"></div>
+      <div class="whp-info">
+        <div class="whp-name">${p.name}</div>
+        <div class="whp-url">${p.url.replace('https://discord.com/api/webhooks/','…/webhooks/')}</div>
+      </div>
+      <button type="button" class="whp-use-btn" onclick="event.stopPropagation();_whpClose('${p.id}',false)">USAR</button>
+    </div>`).join('');
+
+  modal.style.display='flex';
+
+  // Verificar todos en paralelo
+  profiles.forEach(async p=>{
+    const dot=document.getElementById(`whp-dot-${p.id}`);
+    if(!dot)return;
+    try{
+      const r=await fetch(p.url,{method:'GET'});
+      dot.className='whp-dot '+(r.ok?'ok':'err');
+    }catch(e){
+      dot.className='whp-dot err';
+    }
+  });
+}
+
+function _whpClose(profileId,noWebhook){
+  document.getElementById('wh-profiles-modal').style.display='none';
+  const cb=_whpOnSelect;_whpOnSelect=null;
+  if(cb)cb(profileId,noWebhook);
+}
+
+// ── CRUD DE PERFILES ──
+function addWebhookProfile(){
+  showModal('Nombre del canal (ej: #resultados)',(name)=>{
+    showModal('URL del webhook',(url)=>{
+      if(!url.startsWith('https://discord.com/api/webhooks/')){
+        showAlert('URL no válida. Debe ser un webhook de Discord.');return;
+      }
+      const profiles=_getProfiles();
+      if(profiles.length>=8){showAlert('Máximo 8 canales guardados.');return;}
+      const id='p_'+Date.now();
+      profiles.push({id,name,url});
+      _saveProfiles(profiles);
+      renderProfilesList();
+      showAlert(`✓ Canal "${name}" añadido.`);
+    },false);
+  },false);
+}
+
+function renameProfile(id){
+  const profiles=_getProfiles();
+  const p=profiles.find(x=>x.id===id);if(!p)return;
+  showModal(`Nuevo nombre para "${p.name}"`,(name)=>{
+    p.name=name||p.name;
+    _saveProfiles(profiles);
+    renderProfilesList();
+  },false);
+}
+
+function deleteProfile(id){
+  const profiles=_getProfiles();
+  const p=profiles.find(x=>x.id===id);if(!p)return;
+  showConfirm(
+    `¿Eliminar el canal "${p.name}"?`,
+    ()=>{
+      _saveProfiles(profiles.filter(x=>x.id!==id));
+      if(_getActiveProfileId()===id){
+        _setActiveProfileId(null);
+        webhookUrl='';discordConnected=false;updateDiscordUI();
+        document.getElementById('dc-url-input').value='';
+        document.getElementById('dc-webhook-info').classList.remove('visible');
+      }
+      renderProfilesList();
+    },
+    ()=>{}, 'ELIMINAR','CANCELAR'
+  );
+}
+
+async function connectProfile(id){
+  const profiles=_getProfiles();
+  const p=profiles.find(x=>x.id===id);if(!p)return;
+  document.getElementById('dc-url-input').value=p.url;
+  const info=await fetchWebhookInfo(p.url);
+  webhookUrl=p.url;discordConnected=true;
+  _setActiveProfileId(id);
+  if(info){
+    document.getElementById('dc-wi-name').textContent    = info.name||'—';
+    document.getElementById('dc-wi-guild').textContent   = info.guild_id?`ID ${info.guild_id}`:'—';
+    document.getElementById('dc-wi-channel').textContent = info.channel_id||'—';
+    document.getElementById('dc-webhook-info').classList.add('visible');
+  }
+  updateDiscordUI();
+  renderProfilesList();
+}
+
+function renderProfilesList(){
+  const list=document.getElementById('dc-profiles-list');
+  if(!list)return;
+  const profiles=_getProfiles();
+  const activeId=_getActiveProfileId();
+  if(!profiles.length){
+    list.innerHTML=`<div style="font-size:11px;color:#2a1a40;text-align:center;padding:14px 0;letter-spacing:.5px">Sin canales guardados — añade uno arriba</div>`;
+    return;
+  }
+  list.innerHTML=profiles.map(p=>`
+    <div class="whp-manage-item${p.id===activeId?' is-active':''}">
+      <div class="whp-info" style="flex:1;min-width:0">
+        <div class="whp-name" style="font-size:12px">${p.name}${p.id===activeId?' <span style="font-size:9px;color:var(--discord);letter-spacing:1px">● ACTIVO</span>':''}</div>
+        <div class="whp-url">${p.url.replace('https://discord.com/api/webhooks/','…/webhooks/')}</div>
+      </div>
+      <div class="whp-manage-actions">
+        <button class="whp-act-btn connect" onclick="connectProfile('${p.id}')">USAR</button>
+        <button class="whp-act-btn" onclick="renameProfile('${p.id}')">✎</button>
+        <button class="whp-act-btn del" onclick="deleteProfile('${p.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  INICIO / INTERFAZ
+// ══════════════════════════════════════════════════
+function startNewMatch(){
+  _migrateOldWebhook();
+  showProfileSelector(async(profileId, noWebhook)=>{
+    if(noWebhook||!profileId){
+      // Sin webhook
+      webhookUrl='';discordConnected=false;
+      document.getElementById('dc-url-input').value='';
+      document.getElementById('dc-webhook-info').classList.remove('visible');
+      updateDiscordUI();
+      askTeamNames();
+      return;
+    }
+    // Usar perfil seleccionado
+    const profiles=_getProfiles();
+    const p=profiles.find(x=>x.id===profileId);
+    if(!p){askTeamNames();return;}
+    document.getElementById('dc-url-input').value=p.url;
+    const info=await fetchWebhookInfo(p.url);
+    webhookUrl=p.url;discordConnected=true;
+    _setActiveProfileId(profileId);
+    if(info){
+      document.getElementById('dc-wi-name').textContent    = info.name||'—';
+      document.getElementById('dc-wi-guild').textContent   = info.guild_id?`ID ${info.guild_id}`:'—';
+      document.getElementById('dc-wi-channel').textContent = info.channel_id||'—';
+      document.getElementById('dc-webhook-info').classList.add('visible');
+    }
+    updateDiscordUI();
+    askTeamNames();
+  });
+}
+
+function askTeamNames(){
+  showModal("NOMBRE EQUIPO ROJO",val=>{
+    state.redName=val||"ROJO";
+    showModal("NOMBRE EQUIPO AZUL",val2=>{
+      state.blueName=val2||"AZUL";
+      state.origRed=state.redName;state.origBlue=state.blueName;
+      resetState();initInterface();
+    },false);
+  },false);
+}
+
+function resetState(){
+  state.id=Date.now();
+  state.score={red:0,blue:0};state.origScore={red:0,blue:0};
+  state.events=[];state.period=1;
+  state.startTime=null;state.endTime=null;state.inProgress=false;
+  state.players={red:[],blue:[]};
+  endSnapshot=null;
+}
+
+function initInterface(){
+  document.getElementById('launcher').style.display='none';
+  document.getElementById('history-panel').style.display='none';
+  const mainApp=document.getElementById('main-app');
+  mainApp.style.display='flex';
+  mainApp.classList.remove('visible');
+  void mainApp.offsetWidth;
+  mainApp.classList.add('visible');
+  document.getElementById('lbl-red').innerText=state.redName;
+  document.getElementById('lbl-blue').innerText=state.blueName;
+  document.getElementById('cards-lbl-red').innerText=state.redName;
+  document.getElementById('cards-lbl-blue').innerText=state.blueName;
+  document.getElementById('lbl-red').innerText=state.redName;
+  document.getElementById('lbl-blue').innerText=state.blueName;
+  document.getElementById('btn-resend-start').style.display=state.startTime?'':'none';
+  document.getElementById('btn-resend-end').style.display=state.endTime?'':'none';
+  updateScoreUI();updateTimeUI();updatePeriodUI();
+  renderEventList();updateDiscordUI();buildWeGrid();_updateMsgsBtn();
+  renderProfilesList();
+  // Sincronizar ajustes con localStorage
+  const dv=document.getElementById('delay-val');if(dv)dv.textContent=cdDelay;
+  const pv=document.getElementById('ping-interval-val');if(pv)pv.textContent=pingIntervalSecs+'s';
+  const chk=document.getElementById('goal-anim-chk');if(chk){chk.checked=goalAnimEnabled;toggleGoalAnim(goalAnimEnabled);}
+  // Mini mode
+  const mc=document.getElementById('mini-mode-chk');if(mc){mc.checked=miniModeEnabled;toggleMiniMode(miniModeEnabled);}
+  // Animación tipo
+  const at=document.getElementById('goal-anim-type');if(at){at.value=goalAnimType;setGoalAnimType(goalAnimType);}
+  const gi=document.getElementById('goal-init-msg');if(gi)gi.value=goalInitMsg;
+  // Zoom
+  _applyZoom(zoomScale);
+  // Tema
+  _applyTheme(lightMode);
+  // Idioma
+  _applyLang(currentLang);
+}
+
+function tab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(id==='sec-export')loadExportUI();
+  // Ping 2s en pestaña Discord, restaurar al salir
+  if(id==='sec-discord'){
+    _activeFastPing=true;
+    if(discordConnected)_startPing();
+    // Deshabilitar controles de ping interval
+    const pMinus=document.querySelector('[onclick="changePingInterval(-10)"]');
+    const pPlus=document.querySelector('[onclick="changePingInterval(10)"]');
+    const pVal=document.getElementById('ping-interval-val');
+    if(pMinus)pMinus.disabled=true;if(pPlus)pPlus.disabled=true;
+    if(pVal){pVal.textContent='2s (Discord activo)';pVal.style.color='#5865f2';}
+  }else if(_activeFastPing){
+    _activeFastPing=false;
+    if(discordConnected)_startPing();
+    const pMinus=document.querySelector('[onclick="changePingInterval(-10)"]');
+    const pPlus=document.querySelector('[onclick="changePingInterval(10)"]');
+    const pVal=document.getElementById('ping-interval-val');
+    if(pMinus)pMinus.disabled=false;if(pPlus)pPlus.disabled=false;
+    if(pVal){pVal.textContent=pingIntervalSecs+'s';pVal.style.color='';}
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  PERÍODO / TIEMPO / SCORE
+// ══════════════════════════════════════════════════
+function updatePeriodUI(){
+  const btn=document.getElementById('period-btn');
+  if(!state.startTime){btn.innerText='1T';btn.classList.remove('second');}
+  else if(state.endTime){btn.innerText='FIN';btn.classList.add('second');}
+  else if(!state.inProgress&&state.startTime){btn.innerText='½T';btn.classList.add('second');}
+  else{btn.innerText=state.period===1?'1T':'2T';btn.classList.toggle('second',state.period!==1);}
+}
+
+function setMatchStatus(action){
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(action==='start'){
+    if(!state.inProgress){
+      if(!state.startTime)state.startTime=ts;
+      state.endTime=null;state.inProgress=true;
+      queueMatchStart();
+      autoSave();
+    }
+  }else if(action==='end'){
+    state.endTime=ts;state.inProgress=false;
+    endSnapshot=JSON.parse(JSON.stringify(state));
+    saveMatchToHistory();
+  }
+  updateTimeUI();updatePeriodUI();
+}
+
+function updateTimeUI(){
+  const btn=document.getElementById('btn-start'),log=document.getElementById('time-log-display');
+  if(state.inProgress){
+    btn.innerText='EN JUEGO';btn.classList.add('playing');
+    log.innerText=`INICIO: ${state.startTime} (Jugando…)`;
+  }else if(state.endTime){
+    btn.innerText='REANUDAR';btn.classList.remove('playing');
+    log.innerText=`INICIO: ${state.startTime} — FIN: ${state.endTime}`;
+  }else if(state.startTime){
+    btn.innerText='REANUDAR';btn.classList.remove('playing');
+    log.innerText=`INICIO: ${state.startTime} (½T)`;
+  }else{
+    btn.innerText='INICIAR';btn.classList.remove('playing');
+    log.innerText='ESPERANDO INICIO…';
+  }
+  document.getElementById('btn-resend-start').style.display=state.startTime?'':'none';
+}
+
+function modScore(team,delta){
+  // Anti-error: no se puede anotar si no ha iniciado o está en medio tiempo
+  if(delta>0){
+    if(!state.inProgress){showAlert('⚠️ No puedes anotar antes de iniciar el partido.');return;}
+    if(state.startTime&&!state.inProgress&&!state.endTime){showAlert('⚠️ No puedes anotar durante el medio tiempo.');return;}
+  }
+  // Al restar gol: cancelar countdown activo de gol si está en cola, o borrar de DC si ya se envió
+  if(delta<0&&state.score[team]>0){
+    const goalInQueue=cdQueue.findIndex(q=>q.label.startsWith('⚽'));
+    if(goalInQueue>=0){
+      // Está en delay — cancelar directamente sin preguntar
+      if(goalInQueue===0&&cdInterval){clearInterval(cdInterval);cdInterval=null;cdCurrentCb=null;}
+      cdQueue.splice(goalInQueue,1);
+      if(goalInQueue===0&&cdQueue.length)_processQueue();
+      else _renderStack();
+      _applyScoreChange(team,delta);
+      return;
+    }
+    if(discordConnected){
+      const goalMsgs=msgHistory.filter(m=>m.label.startsWith('⚽'));
+      if(goalMsgs.length){
+        const last=goalMsgs[goalMsgs.length-1];
+        showConfirm(
+          `⚽ Se restará un gol.\n¿Eliminar el último mensaje de gol de Discord?\n\n(ya se había enviado)`,
+          ()=>{deleteMsg(last.dcId);_removeMsgByUid(last.uid);_applyScoreChange(team,delta);},
+          ()=>{_applyScoreChange(team,delta);},
+          'BORRAR MENSAJE','SOLO RESTAR'
+        );
+        return;
+      }
+    }
+  }
+  _applyScoreChange(team,delta);
+}
+
+function _applyScoreChange(team,delta){
+  state.score[team]+=delta;
+  if(state.score[team]<0)state.score[team]=0;
+  const swapped=state.redName!==state.origRed;
+  if(!swapped){state.origScore.red=state.score.red;state.origScore.blue=state.score.blue;}
+  else{state.origScore.red=state.score.blue;state.origScore.blue=state.score.red;}
+  autoSave();
+  if(delta>0&&state.inProgress){
+    triggerGoalBall(team);
+    if(discordConnected){
+      const t=templates.goal;
+      const hora=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      const team_orig=(!swapped)?(team==='red'?state.origRed:state.origBlue):(team==='red'?state.origBlue:state.origRed);
+      const goalPayload={title:applyVars(t.title,{team:team_orig,teamred:state.origRed,teamblue:state.origBlue,scorered:state.origScore.red,scoreblue:state.origScore.blue,hora}),color:hexToDec(t.color)};
+      enqueueCountdown('⚽ Gol — enviando…',async()=>{
+        const initTitle=_buildGoalInitFrame();
+        const r=await fetch(webhookUrl+'?wait=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[{title:initTitle,color:hexToDec(t.color)}]})});
+        if(r.ok){
+          const d=await r.json().catch(()=>null);
+          if(d?.id){
+            _addMsgHistory(d.id,'⚽ Gol',goalPayload);
+            _animateGoalEmbed(d.id,goalPayload);
+          }
+        }
+      });
+    }
+  }
+  updateScoreUI();
+}
+
+function _buildGoalInitFrame(){
+  switch(goalAnimType){
+    case 'reveal': return 'G';
+    case 'bar':    return '▱▱▱▱▱▱▱▱▱▱';
+    case 'flash':  return '💥';
+    default:       return goalInitMsg||'⚽';
+  }
+}
+
+async function _animateGoalEmbed(msgId,finalPayload){
+  const color=finalPayload.color;
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
+  if(goalAnimType==='reveal'){
+    // Revelado letra por letra: G → GO → GOO → GOOO⚽⚽⚽
+    const frames=['GO','GOO','GOOO','GOOO⚽','GOOO⚽⚽','GOOO⚽⚽⚽ GOL'];
+    for(const f of frames){
+      await delay(350);
+      await patchEmbed(msgId,{title:f,color});
+    }
+    await delay(600);
+  }else if(goalAnimType==='bar'){
+    // Barra de carga: ▱▱▱▱▱ → ▰▱▱▱▱ → ▰▰▱▱▱ → ▰▰▰▰▰
+    const filled='▰',empty='▱',total=10;
+    for(let i=1;i<=total;i++){
+      await delay(200);
+      const bar=filled.repeat(i)+empty.repeat(total-i);
+      await patchEmbed(msgId,{title:bar,color});
+    }
+    await delay(400);
+  }else if(goalAnimType==='flash'){
+    // Flash: 💥 → 🔥 GOL 🔥 → título final
+    await delay(500);
+    await patchEmbed(msgId,{title:'🔥 GOL 🔥',color});
+    await delay(600);
+  }else{
+    // Simple: patch directo con delay
+    await delay(1200);
+  }
+  await patchEmbed(msgId,finalPayload);
+}
+function triggerGoalBall(team){
+  if(!goalAnimEnabled)return;
+  const el=document.getElementById(team==='red'?'score-red':'score-blue');
+  const rect=el.getBoundingClientRect();
+  const ball=document.getElementById('goal-ball');
+  ball.style.left=(rect.left+rect.width/2)+'px';ball.style.top=(rect.top+rect.height/2)+'px';
+  ball.classList.remove('animate');void ball.offsetWidth;ball.classList.add('animate');
+}
+function updateScoreUI(){
+  document.getElementById('score-red').innerText=state.score.red;
+  document.getElementById('score-blue').innerText=state.score.blue;
+}
+
+function swapTeams(){
+  [state.redName,state.blueName]=[state.blueName,state.redName];
+  [state.score.red,state.score.blue]=[state.score.blue,state.score.red];
+  [state.players.red,state.players.blue]=[state.players.blue,state.players.red];
+  state.period=state.period===1?2:1;
+  document.getElementById('lbl-red').innerText=state.redName;
+  document.getElementById('lbl-blue').innerText=state.blueName;
+  document.getElementById('cards-lbl-red').innerText=state.redName;
+  document.getElementById('cards-lbl-blue').innerText=state.blueName;
+  updateScoreUI();updatePeriodUI();renderEventList();
+}
+
+// ══════════════════════════════════════════════════
+//  MODAL Y SANCIONES
+// ══════════════════════════════════════════════════
+
+function showModal(placeholder,cb,showSugg=true,needsReason=false,teamFilter=null){
+  modal.input.placeholder=placeholder;modal.input.value='';modal.reason.value='';
+  modal.callback=cb;modal.needsReason=needsReason;
+  modal.el.style.display='flex';
+  modal.reason.style.display=needsReason?'block':'none';
+  modal.suggestions.innerHTML='';
+  if(showSugg){
+    let players=[];
+    if(teamFilter&&state.players[teamFilter]?.length)players=[...new Set(state.players[teamFilter])];
+    else if(!teamFilter)players=[...new Set(state.events.map(e=>e.player).filter(p=>p!=="Desconocido"))];
+    players.forEach(p=>{
+      const hasY=state.events.some(e=>e.player===p&&e.team===(teamFilter||e.team)&&e.type==='TA');
+      const chip=document.createElement('div');
+      chip.className=`chip ${hasY?'has-card':''}`;chip.innerHTML=hasY?`🟨 ${p}`:p;
+      chip.onclick=()=>{
+        modal.input.value=p;
+        if(hasY&&pendingContext?.type==='TA'){pendingContext.type='TR';modal.input.style.color='var(--red)';setTimeout(()=>modal.input.style.color='#fff',500);}
+        modal.input.focus();
+      };
+      modal.suggestions.appendChild(chip);
+    });
+  }
+  modal.input.focus();
+}
+
+function confirmModal(){
+  const player=modal.input.value.trim(),reason=modal.reason.value.trim();
+  if(!player){modal.input.style.borderColor='var(--red)';setTimeout(()=>modal.input.style.borderColor='#2a1a40',700);return;}
+  // La razón es siempre opcional — si needsReason solo muestra el campo pero no obliga
+  modal.el.style.display='none';if(modal.callback)modal.callback(player,reason);
+}
+function cancelModal(){modal.el.style.display='none';modal.callback=null;}
+modal.input.addEventListener('keypress',e=>{if(e.key==='Enter'){if(modal.needsReason)modal.reason.focus();else confirmModal();}});
+modal.reason.addEventListener('keypress',e=>{if(e.key==='Enter')confirmModal();});
+
+// B3: detecta doble amarilla por nombre de jugador, ignorando lado visual (cross-swap)
+function hasYellowCard(player){
+  return state.events.some(e=>e.player===player&&e.type==='TA');
+}
+
+function promptEvent(team,type){
+  pendingContext={team,type};
+  // Título dinámico según tipo de tarjeta
+  const titleLabel=document.getElementById('modal-title-label');
+  if(titleLabel){
+    if(type==='TA')titleLabel.innerHTML='🟨 TARJETA AMARILLA';
+    else if(type==='TR')titleLabel.innerHTML='🟥 TARJETA ROJA';
+    else titleLabel.innerHTML='DATOS JUGADOR';
+  }
+  showModal(`JUGADOR (${type})`,(player,reason)=>{
+    player=player||"Desconocido";
+    if(!state.players[team].includes(player))state.players[team].push(player);
+    let finalType=pendingContext.type,wasDouble=false;
+    if(finalType==='TA'){
+      // B3: buscar TA por nombre de jugador en cualquier equipo (cubre post-swap)
+      if(hasYellowCard(player)){finalType='TR';wasDouble=true;}
+    }
+    // Guardar el nombre real del equipo en el evento (no el lado físico)
+    // para que post-swap las tarjetas sigan al equipo correcto
+    const swapped=state.redName!==state.origRed;
+    const tName=(!swapped)?(team==='red'?state.origRed:state.origBlue):(team==='red'?state.origBlue:state.origRed);
+    state.events.push({id:Date.now(),team,teamName:tName,type:finalType,player,reason,wasDouble,period:state.period});
+    renderEventList();
+    autoSave();
+    if(discordConnected){
+      const payload=buildCardPayload(finalType,player,tName,reason);
+      const label=finalType==='TA'?'🟨 Tarjeta amarilla — enviando…':'🟥 Tarjeta roja — enviando…';
+      const histLabel=finalType==='TA'?`🟨 TA · ${player}`:`🟥 TR · ${player}`;
+      enqueueCountdown(label,async()=>{const id=await sendEmbed(payload);_addMsgHistory(id,histLabel,payload);});
+    }
+  },true,true,team);  // showSugg=true, showReason=true (opcional)
+}
+
+function deleteEvent(eventId){
+  const ev=state.events.find(e=>e.id===eventId);
+  if(!ev)return;
+  // Buscar mensaje correlacionado por label con nombre del jugador
+  const playerLabel=ev.type==='TA'?`🟨 TA · ${ev.player}`:`🟥 TR · ${ev.player}`;
+  const queueIdx=cdQueue.findIndex(q=>q.label.includes(ev.player)&&(q.label.includes('🟨')||q.label.includes('🟥')));
+  const histMsg=msgHistory.find(m=>m.label===playerLabel);
+
+  const _doDelete=()=>{
+    state.events=state.events.filter(e=>e.id!==eventId);
+    state.events.forEach(e=>{
+      if(e.type==='TR'&&e.wasDouble){
+        const stillHasTA=state.events.some(x=>x.player===e.player&&x.type==='TA'&&x.id!==e.id);
+        if(!stillHasTA)e.wasDouble=false;
+      }
+    });
+    renderEventList();autoSave();
+  };
+
+  if(queueIdx>=0){
+    // Está en delay — cancelar sin preguntar
+    if(queueIdx===0&&cdInterval){clearInterval(cdInterval);cdInterval=null;cdCurrentCb=null;}
+    cdQueue.splice(queueIdx,1);
+    if(queueIdx===0&&cdQueue.length)_processQueue();else _renderStack();
+    _doDelete();
+  }else if(histMsg&&discordConnected){
+    showConfirm(
+      `¿Eliminar la sanción de ${ev.player}?\n(ya se había enviado a Discord)`,
+      ()=>{deleteMsg(histMsg.dcId);_removeMsgByUid(histMsg.uid);_doDelete();},
+      ()=>{_doDelete();},
+      'BORRAR DE DC','SOLO QUITAR'
+    );
+  }else{
+    _doDelete();
+  }
+}
+function renderEventList(){
+  // Determinar qué equipos van en cada columna visual (rojo/azul)
+  // Usamos teamName guardado en el evento para seguir al equipo tras swap
+  ['red','blue'].forEach(side=>{
+    const currentName=side==='red'?state.redName:state.blueName;
+    const c=document.getElementById(`list-${side}`);c.innerHTML='';
+    // Mostrar eventos cuyo teamName coincide con el equipo actualmente en ese lado
+    // Compatibilidad: eventos viejos sin teamName usan e.team
+    state.events.filter(e=>(e.teamName?e.teamName===currentName:e.team===side)).forEach(e=>{
+      const div=document.createElement('div');div.className=`card-item ${e.type}`;
+      const icon=e.type==='TA'?'🟨':'🟥';
+      const pLbl=e.period?` <span style="color:#3d1a5a;font-size:10px">[${e.period===1?'1T':'2T'}]</span>`:'';
+      const dLbl=e.wasDouble?` <span style="color:#5a2a2a;font-size:10px">(2TA)</span>`:'';
+      const rLbl=e.reason?` <span style="color:#444;font-size:10px">— ${e.reason}</span>`:'';
+      div.innerHTML=`<div><b>${icon}</b> ${e.player}${pLbl}${dLbl}${rLbl}</div><div class="delete-btn" onclick="deleteEvent(${e.id})">×</div>`;
+      c.appendChild(div);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  HISTORIAL
+// ══════════════════════════════════════════════════
+let currentWeekFilter='all';
+
+function toggleHistory(show){
+  document.getElementById('history-panel').style.display=show?'flex':'none';
+  if(show){buildWeekSidebar();loadHistoryUI('all');}
+}
+
+function getWeekLabel(savedAt){
+  if(!savedAt)return'Sin fecha';
+  const d=new Date(savedAt);if(isNaN(d))return'Sin fecha';
+  const now=new Date();
+  const startOfWeek=dt=>{const d2=new Date(dt);d2.setHours(0,0,0,0);const day=d2.getDay()||7;d2.setDate(d2.getDate()-day+1);return d2;};
+  const thisW=startOfWeek(now),prevW=new Date(thisW);prevW.setDate(prevW.getDate()-7);
+  const dW=startOfWeek(d);
+  if(dW>=thisW)return'Esta semana';
+  if(dW>=prevW)return'Sem. anterior';
+  const endW=new Date(dW);endW.setDate(endW.getDate()+6);
+  const fmt=dt=>`${dt.getDate()}/${dt.getMonth()+1}`;
+  return`${fmt(dW)}-${fmt(endW)}`;
+}
+
+function buildWeekSidebar(){
+  const h=getHistory(),sidebar=document.getElementById('hist-sidebar');
+  const weeks=[],seen=new Set();
+  h.forEach(m=>{if(!m._sep){const l=getWeekLabel(m.savedAt);if(l&&!seen.has(l)){seen.add(l);weeks.push(l);}}});
+  sidebar.innerHTML=`<div class="hist-week-btn ${currentWeekFilter==='all'?'active':''}" onclick="filterWeek('all',this)">TODO</div>`;
+  if(weeks.length>1){
+    sidebar.innerHTML+='<div class="hist-week-sep"></div>';
+    weeks.forEach(w=>{
+      const a=currentWeekFilter===w?'active':'';
+      const short=w==='Esta semana'?'ESTA SEM.':w==='Sem. anterior'?'SEM. ANT.':w;
+      sidebar.innerHTML+=`<div class="hist-week-btn ${a}" onclick="filterWeek('${w.replace(/'/g,"\\'")}',this)">${short}</div>`;
+    });
+  }
+}
+
+function filterWeek(week,el){
+  currentWeekFilter=week;
+  document.querySelectorAll('.hist-week-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  loadHistoryUI(week);
+}
+
+function getHistory(){return JSON.parse(localStorage.getItem('haxref_v2_history')||'[]');}
+
+function loadHistoryUI(weekFilter){
+  const list=document.getElementById('match-list');
+  const raw=getHistory();
+  const items=weekFilter==='all'?raw:raw.filter(m=>m._sep||getWeekLabel(m.savedAt)===weekFilter);
+  if(!items.length){list.innerHTML="<div style='text-align:center;padding:20px;color:#444'>No hay partidos</div>";return;}
+  list.innerHTML=items.map(m=>{
+    if(m._sep)return`<div class="match-sep">
+      <div class="match-sep-line"></div>
+      <div class="match-sep-label">${m.label||'─────'}</div>
+      <div class="match-sep-line"></div>
+      <button class="match-sep-del" onclick="deleteSeparator(${m.id})">✕</button>
+    </div>`;
+    const sr=m.score.red,sb=m.score.blue;
+    const badgeColor=sr>sb?'rgba(76,175,80,.15)':sr<sb?'rgba(255,42,42,.12)':'rgba(90,58,122,.15)';
+    const badgeBorder=sr>sb?'#1a3a1a':sr<sb?'#3a1111':'#2a1a40';
+    const badgeTxt=sr>sb?'#4caf50':sr<sb?'#ff6b6b':'#6a4a8a';
+    return`<div class="match-item">
+      <div style="flex:1" onclick="loadMatchFromHistory(${m.id})">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="color:#ccc;font-weight:700;font-size:13px">${m.redName} <span style="color:#eee">vs</span> ${m.blueName}</div>
+          <div style="background:${badgeColor};border:1px solid ${badgeBorder};color:${badgeTxt};font-size:11px;font-weight:900;padding:1px 8px;border-radius:10px;font-family:monospace;flex-shrink:0">${sr}-${sb}</div>
+        </div>
+        <div style="font-size:10px;margin-top:3px;color:#3d1a5a">${m.startTime||'?'} — ${m.endTime||'?'} · ${getWeekLabel(m.savedAt)}</div>
+      </div>
+      <div class="match-actions">
+        <span class="view-lnk" onclick="loadMatchFromHistory(${m.id})">VER ➜</span>
+        <button class="del-match-btn" onclick="deleteMatchFromHistory(${m.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addSeparator(){
+  showModal('Nombre del separador (ej: JORNADA 3)',label=>{
+    const h=getHistory();
+    h.unshift({_sep:true,id:Date.now(),label:label||'──────'});
+    localStorage.setItem('haxref_v2_history',JSON.stringify(h.slice(0,40)));
+    buildWeekSidebar();loadHistoryUI(currentWeekFilter);
+  },false);
+}
+
+function deleteSeparator(id){
+  localStorage.setItem('haxref_v2_history',JSON.stringify(getHistory().filter(x=>x.id!==id)));
+  buildWeekSidebar();loadHistoryUI(currentWeekFilter);
+}
+
+function saveMatchToHistory(){
+  let h=getHistory();
+  const idx=h.findIndex(x=>x.id===state.id);
+  const snap=JSON.parse(JSON.stringify(state));snap.savedAt=new Date().toLocaleString();
+  if(idx>=0)h[idx]=snap;else h.unshift(snap);
+  localStorage.setItem('haxref_v2_history',JSON.stringify(h.slice(0,40)));
+}
+
+function deleteMatchFromHistory(id){
+  localStorage.setItem('haxref_v2_history',JSON.stringify(getHistory().filter(x=>x.id!==id)));
+  buildWeekSidebar();loadHistoryUI(currentWeekFilter);
+}
+
+function loadMatchFromHistory(id){
+  const m=getHistory().find(x=>x.id===id);
+  if(!m||m._sep)return;
+  state=JSON.parse(JSON.stringify(m));
+  if(!state.origRed)state.origRed=state.redName;
+  if(!state.origBlue)state.origBlue=state.blueName;
+  if(!state.origScore)state.origScore={...state.score};
+  if(!state.players)state.players={red:[],blue:[]};
+  state.inProgress=false;
+  if(state.endTime)endSnapshot=JSON.parse(JSON.stringify(state));
+  initInterface();toggleHistory(false);
+}
+
+// AUTO-SAVE: persiste el partido en cada cambio relevante
+let _autoSaveTimer=null;
+function autoSave(){
+  if(!state.id)return;
+  if(!(state.score.red>0||state.score.blue>0||state.events.length>0||state.startTime))return;
+  if(_autoSaveTimer)return; // ya hay uno pendiente
+  _autoSaveTimer=setTimeout(()=>{_autoSaveTimer=null;saveMatchToHistory();},800);
+}
+
+window.onbeforeunload=()=>{
+  // B6: guardar también si el partido fue iniciado aunque sea 0-0
+  if(state.score.red>0||state.score.blue>0||state.events.length>0||state.startTime)saveMatchToHistory();
+};
+
+// ══════════════════════════════════════════════════
+//  EXPORTAR / IMPORTAR
+// ══════════════════════════════════════════════════
+function loadExportUI(){
+  const list=document.getElementById('exp-list');
+  const h=getHistory().filter(m=>!m._sep);
+  if(!h.length){list.innerHTML=`<div class="exp-empty">No hay partidos guardados</div>`;return;}
+  list.innerHTML=h.map(m=>`
+    <label class="exp-item">
+      <input type="checkbox" class="exp-check" value="${m.id}">
+      <div class="exp-item-info">
+        <div class="exp-item-title">${m.redName} ${m.score.red} - ${m.score.blue} ${m.blueName}</div>
+        <div class="exp-item-sub">${m.startTime||'?'} — ${m.endTime||'?'} · ${m.savedAt||'?'}</div>
+      </div>
+    </label>`).join('');
+}
+
+function toggleSelectAll(){
+  const checks=[...document.querySelectorAll('.exp-check')];
+  const all=checks.every(c=>c.checked);checks.forEach(c=>c.checked=!all);
+}
+
+function exportSelected(){
+  const ids=[...document.querySelectorAll('.exp-check:checked')].map(c=>parseInt(c.value));
+  if(!ids.length){showAlert('Selecciona al menos un partido.');return;}
+  const matches=getHistory().filter(m=>ids.includes(m.id));
+  let txt=`HaxRef Pro V2.3 — Exportación\n${'═'.repeat(40)}\nExportado: ${new Date().toLocaleString()}\n\n`;
+  matches.forEach((m,i)=>{
+    txt+=`PARTIDO ${i+1}\n${'-'.repeat(30)}\n[HAXREF_MATCH_START]\n`;
+    txt+=`id:${m.id}\nred:${m.redName}\nblue:${m.blueName}\n`;
+    txt+=`score_red:${m.score.red}\nscore_blue:${m.score.blue}\n`;
+    txt+=`orig_red:${m.origRed||m.redName}\norig_blue:${m.origBlue||m.blueName}\n`;
+    txt+=`orig_score_red:${m.origScore?.red??m.score.red}\norig_score_blue:${m.origScore?.blue??m.score.blue}\n`;
+    txt+=`start:${m.startTime||''}\nend:${m.endTime||''}\nsavedAt:${m.savedAt||''}\n`;
+    txt+=`[HAXREF_MATCH_END]\n\n`;
+  });
+  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`haxref_export_${Date.now()}.txt`;
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+function triggerImport(){document.getElementById('import-file').click();}
+
+function handleImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const txt=ev.target.result;
+    const blocks=txt.split('[HAXREF_MATCH_START]').slice(1);
+    if(!blocks.length){showAlert('No se encontraron partidos válidos en el archivo.');return;}
+    const parsed=[];
+    blocks.forEach(block=>{
+      const end=block.indexOf('[HAXREF_MATCH_END]');
+      const raw=end>=0?block.substring(0,end):block;
+      const obj={};
+      raw.trim().split('\n').forEach(l=>{const sep=l.indexOf(':');if(sep<0)return;obj[l.substring(0,sep).trim()]=l.substring(sep+1).trim();});
+      if(!obj.red||!obj.blue)return;
+      parsed.push({
+        id:parseInt(obj.id)||Date.now()+Math.random(),
+        redName:obj.red,blueName:obj.blue,
+        origRed:obj.orig_red||obj.red,origBlue:obj.orig_blue||obj.blue,
+        score:{red:parseInt(obj.score_red)||0,blue:parseInt(obj.score_blue)||0},
+        origScore:{red:parseInt(obj.orig_score_red)||0,blue:parseInt(obj.orig_score_blue)||0},
+        startTime:obj.start||null,endTime:obj.end||null,savedAt:obj.savedAt||new Date().toLocaleString(),
+        events:[],players:{red:[],blue:[]},period:1,inProgress:false
+      });
+    });
+    if(!parsed.length){showAlert('No se pudieron leer partidos del archivo.');return;}
+    showConfirm(
+      `Se encontraron ${parsed.length} partido(s).\n¿Agregar al historial local?`,
+      ()=>{
+        let h=getHistory();
+        parsed.forEach(p=>{if(!h.find(x=>x.id===p.id))h.unshift(p);});
+        localStorage.setItem('haxref_v2_history',JSON.stringify(h.slice(0,40)));
+        loadExportUI();showAlert(`✓ ${parsed.length} partido(s) importado(s).`);
+      },
+      ()=>{},
+      'IMPORTAR','CANCELAR'
+    );
+  };
+  reader.readAsText(file);e.target.value='';
+}
+
+// ══════════════════════════════════════════════════
+//  MODAL GENÉRICO
+// ══════════════════════════════════════════════════
+function showAlert(msg){
+  const el=document.getElementById('generic-modal');
+  document.getElementById('generic-msg-text').textContent=msg;
+  document.getElementById('generic-btns').innerHTML=`<button class="gbtn-confirm" style="flex:none;width:100%" onclick="document.getElementById('generic-modal').style.display='none'">ACEPTAR</button>`;
+  el.style.display='flex';
+}
+let _cOk=null,_cCancel=null;
+function showConfirm(msg,onOk,onCancel,lblOk='SÍ',lblNo='NO'){
+  _cOk=onOk;_cCancel=onCancel;
+  const el=document.getElementById('generic-modal');
+  document.getElementById('generic-msg-text').textContent=msg;
+  document.getElementById('generic-btns').innerHTML=`
+    <button class="gbtn-cancel"  onclick="_closeConfirm(false)">${lblNo}</button>
+    <button class="gbtn-confirm" onclick="_closeConfirm(true)">${lblOk}</button>`;
+  el.style.display='flex';
+}
+function _closeConfirm(ok){
+  document.getElementById('generic-modal').style.display='none';
+  const cb=ok?_cOk:_cCancel;_cOk=null;_cCancel=null;if(cb)cb();
+}
+
+function copyDevUser(){
+  navigator.clipboard.writeText('tutanka4781').catch(()=>{});
+  const lbl=document.getElementById('dev-user-lbl');
+  if(!lbl)return;
+  const orig=lbl.textContent;
+  lbl.textContent='✓ Copiado al portapapeles';lbl.style.color='#4caf50';
+  setTimeout(()=>{lbl.textContent=orig;lbl.style.color='';},1800);
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  _migrateOldWebhook();
+  buildWeGrid();
+});
+</script>
+
+<!-- Banner de actualización -->
+<div id="pwa-update-banner" style="
+  display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:#0d0820;border:1px solid #7c3aed;border-radius:12px;
+  padding:12px 20px;z-index:99999;align-items:center;gap:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.8),0 0 0 1px rgba(124,58,237,.15);
+  white-space:nowrap;backdrop-filter:blur(8px)">
+  <span style="font-size:11px;color:#c084fc;font-weight:700;letter-spacing:1px">
+    ✦ Nueva versión disponible
+  </span>
+  <button onclick="pwaUpdate()" style="
+    background:var(--purple-soft);color:#fff;border:none;border-radius:7px;
+    padding:6px 14px;font-size:11px;font-weight:900;cursor:pointer;
+    letter-spacing:1px;transition:.2s">
+    ACTUALIZAR
+  </button>
+  <button onclick="document.getElementById('pwa-update-banner').style.display='none'" style="
+    background:transparent;border:none;color:#3a2a5a;font-size:16px;
+    cursor:pointer;padding:0 4px;line-height:1">✕</button>
+</div>
+
+<script>
+// ── Registro del Service Worker ──
+let _swReg = null;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      _swReg = await navigator.serviceWorker.register('sw.js');
+
+      // Detectar cuando hay un nuevo SW esperando
+      _swReg.addEventListener('updatefound', () => {
+        const newWorker = _swReg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Hay versión nueva lista — mostrar banner
+            document.getElementById('pwa-update-banner').style.display = 'flex';
+          }
+        });
+      });
+
+      // Verificar actualizaciones cada vez que la app recupera el foco
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && _swReg) _swReg.update();
+      });
+
+    } catch (err) {
+      console.warn('SW no disponible:', err);
+    }
+  });
+
+  // Recargar cuando el nuevo SW tome control
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
+function pwaUpdate() {
+  if (_swReg && _swReg.waiting) {
+    _swReg.waiting.postMessage('SKIP_WAITING');
+  }
+}
+</script>
+</body>
+</html>
