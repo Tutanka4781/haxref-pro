@@ -1,7 +1,6 @@
 # HaxRef Pro
 
-Haxref es un proyecto HTML. 
-Hay cambios en la licencia a partir de la versión 2.4, por favor, léala.
+Haxref es un proyecto HTML para árbitros de Haxball con muchas funciones...
 
 ## Funciones:
 
