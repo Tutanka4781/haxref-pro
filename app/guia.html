@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaxRef Pro 2.5 — Guía de Uso</title>
+<style>
+:root {
+  --red:    #b0b0b0;
+  --blue:   #b0b0b0;
+  --bg:     #070707;
+  --panel:  #0d0d0d;
+  --border: #202020;
+  --accent: #d0d0d0;
+  --yellow: #c8a84b;
+  --discord:#7b83c4;
+  --font:   'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --serif:  Georgia, 'Times New Roman', serif;
+  --mono:   'Courier New', Courier, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: #909090;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND GRID ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 90px 20px 70px;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(180,180,180,.05) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  background: #111;
+  border: 1px solid #282828;
+  color: #555;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 5px 16px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+  font-family: var(--mono);
+}
+.hero-title {
+  font-size: clamp(52px, 10vw, 92px);
+  font-weight: 900;
+  letter-spacing: -3px;
+  color: #d8d8d8;
+  filter: drop-shadow(0 0 40px rgba(200,200,200,.12));
+  line-height: 0.95;
+  margin-bottom: 10px;
+}
+.hero-title span { color: #fff; filter: none; }
+.hero-sub {
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: #282828;
+  font-weight: 700;
+  margin-top: 18px;
+  font-family: var(--mono);
+}
+.hero-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, #484848, transparent);
+  margin: 36px auto 0;
+}
+
+/* ── LAYOUT ── */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ── CHAPTER DIVIDERS ── */
+.chapter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 64px 0 32px;
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #282828;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #404040;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.chapter-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #282828, transparent);
+}
+
+/* ── SECTION HEADER ── */
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sec-icon {
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0f0f0f;
+  border: 1px solid #202020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sec-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #c0c0c0;
+  letter-spacing: -0.5px;
+}
+.sec-title small {
+  font-size: 11px;
+  font-weight: 700;
+  color: #303030;
+  letter-spacing: 3px;
+  margin-left: 8px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.card:hover { border-color: #2c2c2c; }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #383838, transparent);
+}
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #686868;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-family: var(--serif);
+  font-style: italic;
+}
+.card p {
+  color: #888;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.card p + p { margin-top: 10px; }
+
+/* ── NOTE CARD ── */
+.note {
+  background: rgba(255,255,255,.02);
+  border: 1px solid #202020;
+  border-left: 2px solid #484848;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #606060;
+  margin-bottom: 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  line-height: 1.8;
+}
+.note b { color: #909090; font-style: normal; }
+
+/* ── PILL TAGS ── */
+.pill {
+  display: inline-block;
+  background: #0f0f0f;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #686868;
+  font-family: var(--mono);
+  margin: 2px 3px 2px 0;
+}
+.pill.red   { border-color: #2a2a2a; color: #b0b0b0; background: rgba(255,255,255,.03); }
+.pill.blue  { border-color: #2a2a2a; color: #b0b0b0; background: rgba(255,255,255,.03); }
+.pill.gold  { border-color: rgba(200,168,75,.3); color: var(--yellow); background: rgba(200,168,75,.05); }
+.pill.dc    { border-color: rgba(123,131,196,.3); color: var(--discord); background: rgba(123,131,196,.05); }
+.pill.green { border-color: rgba(76,175,80,.3); color: #6ab06d; background: rgba(76,175,80,.05); }
+
+/* ── KBD ── */
+kbd {
+  display: inline-block;
+  background: #111;
+  border: 1px solid #303030;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #b0b0b0;
+  white-space: nowrap;
+}
+
+/* ── ROW LIST ── */
+.row-list { display: flex; flex-direction: column; gap: 10px; }
+.row-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 18px;
+  background: #090909;
+  border: 1px solid #181818;
+  border-radius: 10px;
+  transition: border-color .2s, background .2s;
+}
+.row-item:hover { border-color: #282828; background: #0d0d0d; }
+.row-item-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; margin-top: 1px; }
+.row-item-body { flex: 1; }
+.row-item-title { font-size: 14px; font-weight: 800; color: #c0c0c0; margin-bottom: 3px; }
+.row-item-desc  { font-size: 13px; color: #585858; line-height: 1.7; }
+
+/* ── SHORTCUT TABLE ── */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 20px;
+  align-items: center;
+}
+.shortcut-keys { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.shortcut-keys span { font-size: 11px; color: #303030; font-family: var(--mono); }
+.shortcut-desc { font-size: 13px; color: #686868; }
+.shortcut-sep { grid-column: 1 / -1; height: 1px; background: #181818; }
+
+/* ── VARIABLES GRID ── */
+.vars-block { margin-bottom: 10px; }
+.vars-event {
+  font-size: 11px;
+  color: #484848;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 6px;
+}
+
+/* ── EVENTS ROW ── */
+.events-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  background: #090909;
+  border: 1px solid #181818;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── INLINE ACCENT ── */
+.acc      { color: #d0d0d0; font-weight: 700; }
+.acc-red  { color: #b0b0b0; font-weight: 700; }
+.acc-blue { color: #b0b0b0; font-weight: 700; }
+.acc-gold { color: var(--yellow); font-weight: 700; }
+.acc-dc   { color: var(--discord); font-weight: 700; }
+.muted    { color: #484848; font-size: 13px; }
+.mono     { font-family: var(--mono); font-size: 13px; }
+
+/* ── TIMELINE ── */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom, #383838, #181818);
+}
+.tl-item {
+  position: relative;
+  padding: 12px 16px;
+  background: #090909;
+  border: 1px solid #181818;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: border-color .2s;
+}
+.tl-item:hover { border-color: #282828; }
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -23px; top: 17px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #282828;
+  border: 1px solid #505050;
+}
+.tl-title { font-size: 14px; font-weight: 800; color: #b0b0b0; margin-bottom: 4px; }
+.tl-desc  { font-size: 13px; color: #585858; line-height: 1.7; }
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px 20px 60px;
+  border-top: 1px solid #141414;
+}
+footer .ft-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #202020;
+  letter-spacing: -1px;
+}
+footer .ft-by {
+  font-size: 11px;
+  color: #181818;
+  letter-spacing: 4px;
+  margin-top: 6px;
+  font-family: var(--mono);
+}
+
+/* ── FADE IN ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero { animation: fadeUp .6s ease forwards; }
+.container > * { animation: fadeUp .5s ease both; }
+.container > *:nth-child(1)  { animation-delay: .05s }
+.container > *:nth-child(2)  { animation-delay: .10s }
+.container > *:nth-child(3)  { animation-delay: .15s }
+.container > *:nth-child(4)  { animation-delay: .20s }
+.container > *:nth-child(5)  { animation-delay: .25s }
+.container > *:nth-child(6)  { animation-delay: .30s }
+.container > *:nth-child(7)  { animation-delay: .35s }
+.container > *:nth-child(8)  { animation-delay: .38s }
+.container > *:nth-child(9)  { animation-delay: .41s }
+.container > *:nth-child(10) { animation-delay: .44s }
+.container > *:nth-child(n+11) { animation-delay: .47s }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #070707; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #404040; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">MANUAL DE USO · V2.4.6</div>
+  <div class="hero-title">HaxRef <span>Pro</span></div>
+  <div class="hero-sub">by tutanka</div>
+  <div class="hero-line"></div>
+</div>
+
+<div class="container">
+
+  <!-- ── GENERAL ── -->
+  <div class="chapter">
+    <span class="chapter-num">01</span>
+    <span class="chapter-title">General</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">⚽</div>
+    <div class="sec-title">Inicio rápido</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Pantalla de inicio</div>
+    <p>Al abrir HaxRef verás dos opciones: <span class="acc">Nuevo partido</span> e <span class="acc">Historial</span>. Al dar click en Nuevo partido, si no hay un webhook guardado se te preguntará cómo continuar — puedes omitirlo o configurarlo ahí mismo.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🟥</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Nombre equipo rojo → Nombre equipo azul</div>
+        <div class="row-item-desc">Se te pedirán los nombres uno por uno. Una vez ingresados aparece el marcador y la barra de navegación.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🖱️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Sumar gol — click izquierdo · Restar — click derecho</div>
+        <div class="row-item-desc">Haz click sobre el número del equipo. Los goles solo disparan el webhook y la animación de pelota si el partido está en curso (botón INICIAR presionado).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> al pulsar <kbd>Ctrl</kbd> tienes 1 segundo para presionar la tecla de gol. Si no lo haces, no ocurre nada.</div>
+
+  <!-- HISTORIAL -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">📋</div>
+    <div class="sec-title">Historial</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Organización</div>
+    <p>Los partidos se agrupan por semana. En la barra lateral izquierda puedes filtrar entre <span class="acc">TODO</span>, <span class="acc">ESTA SEM.</span>, <span class="acc">SEM. ANT.</span> y rangos anteriores. Cada partido muestra un badge de color: <span class="acc" style="color:#4caf50">verde</span> si ganó el rojo, <span class="acc-red">rojo</span> si ganó el azul, <span class="acc">morado</span> si empate.</p>
+  </div>
+
+  <div class="row-list">
+    <div class="row-item">
+      <div class="row-item-icon">➜</div>
+      <div class="row-item-body">
+        <div class="row-item-title">VER ➜ / click en el partido</div>
+        <div class="row-item-desc">Carga ese partido en la interfaz principal para consultarlo o continuarlo.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">✕</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Botón × en cada partido</div>
+        <div class="row-item-desc">Elimina ese partido del historial permanentemente.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">＋</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Añadir separador</div>
+        <div class="row-item-desc">Crea un divisor visual con nombre personalizado (ej: <span class="mono">JORNADA 3</span>). Se elimina con su propio botón ×. El historial acepta hasta <span class="acc">40 entradas</span> en total.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FUNCIONES ── -->
+  <div class="chapter">
+    <span class="chapter-num">02</span>
+    <span class="chapter-title">Funciones</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <!-- WEBHOOKS -->
+  <div class="sec-header">
+    <div class="sec-icon" style="font-size:16px">🔗</div>
+    <div class="sec-title">Webhooks <small>DISCORD</small></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Cómo obtener la URL</div>
+    <p>En Discord ve al canal deseado → <span class="acc-dc">Editar canal</span> → <span class="acc-dc">Integraciones</span> → <span class="acc-dc">Webhooks</span> → <span class="acc-dc">Añadir webhook</span>. Haz click en el webhook creado y copia el enlace.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Webhook guardado</div>
+    <p>Si ya guardaste un webhook anteriormente, al iniciar un nuevo partido HaxRef lo verifica automáticamente y muestra un modal con su nombre, servidor e ID. Elige <span class="acc">USAR</span> para conectar directamente o <span class="acc">NUEVO</span> para descartarlo y configurar otro desde la pestaña Discord.</p>
+  </div>
+
+  <div class="two-col" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">COMPROBAR</div>
+      <p>Envía un mensaje de prueba al canal que se borra solo a los <span class="acc">15 segundos</span>.</p>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-label">CONECTAR / DESCONECTAR</div>
+      <p>Activa o desactiva la conexión. El webhook queda guardado en el navegador para la próxima sesión.</p>
+    </div>
+  </div>
+
+  <!-- ── PESTAÑAS ── -->
+  <div class="chapter">
+    <span class="chapter-num">03</span>
+    <span class="chapter-title">Pestañas</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <!-- MARCADOR -->
+  <div class="sec-header">
+    <div class="sec-icon">🏟️</div>
+    <div class="sec-title">Marcador <small>PESTAÑA 1</small></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Controles centrales</div>
+    <p>Entre los dos marcadores hay tres controles en fila: el indicador de período, el botón de tarjetas y el botón de swap.</p>
+    <p style="margin-top:10px">Los marcadores usan el <span class="acc">Silver Design</span> — números en blanco plateado sin colores de equipo. Si tienes escudos configurados en D-Mark, aparecen centrados encima de cada marcador.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🕐</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Indicador de período — Quick-P</div>
+        <div class="row-item-desc">Muestra el tiempo transcurrido y el período actual (<span class="pill">1T</span> / <span class="pill">2T</span>). Durante el partido activo es clickeable: cada toque alterna entre <span class="acc">pausado</span> y en marcha sin tocar otros controles. En tiempo extra muestra el formato <span class="mono">8+1'</span>. Fuera del partido muestra <span class="pill">½T</span> o <span class="pill">FIN</span> según el estado.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🟨</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Botón de tarjetas (acceso rápido)</div>
+        <div class="row-item-desc">Abre directamente el modal de amonestación sin necesidad de ir a ninguna pestaña. Desde ese modal puedes seleccionar el equipo, cambiar entre <span class="acc-gold">amarilla</span> y <span class="acc-red">roja</span>, y acceder a la lista de tarjetas del partido con <span class="acc">📋 Ver tarjetas</span>.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⇄</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Swap de equipos</div>
+        <div class="row-item-desc">Intercambia visualmente los lados, logos y colores en la interfaz. No afecta el marcador de Discord (D-Mark), que siempre muestra los equipos en su posición original.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🟢</div>
+      <div class="row-item-body">
+        <div class="row-item-title">INICIAR</div>
+        <div class="row-item-desc">Registra la hora de inicio y arranca el cronómetro. Si hay webhook conectado, sube el marcador visual (D-Mark) como imagen a Discord. El botón cambia a <span class="acc">EN JUEGO</span>.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⏸</div>
+      <div class="row-item-body">
+        <div class="row-item-title">⏸ ½T — Inicio de medio tiempo</div>
+        <div class="row-item-desc">Pide confirmación. Al aceptar, los equipos se rotan automáticamente (swap), el cronómetro se detiene y se envía el mensaje a Discord. Solo funciona si el partido ya fue iniciado.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">▶️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">▶ ½T — Fin de medio tiempo</div>
+        <div class="row-item-desc">Reanuda el partido en el segundo tiempo, resetea el cronómetro a 0 y envía el mensaje de fin de ½T a Discord.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🏁</div>
+      <div class="row-item-body">
+        <div class="row-item-title">🏁 FIN</div>
+        <div class="row-item-desc">Pide confirmación mostrando el marcador. Al aceptar, guarda el partido en el historial y actualiza el D-Mark con el estado final. Aparece el botón <span class="acc">↺</span> para reenviar el resultado si es necesario.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Barra de estado — tiempo</div>
+    <p>
+      <span class="muted mono">ESPERANDO INICIO…</span> — antes de iniciar<br>
+      <span class="muted mono">INICIO: HH:MM (Jugando…)</span> — durante el partido<br>
+      <span class="muted mono">INICIO: HH:MM — FIN: HH:MM</span> — finalizado
+    </p>
+  </div>
+
+  <div class="note"><b>Auto-guardado:</b> HaxRef guarda automáticamente en cada cambio relevante (gol, tarjeta, inicio). También guarda si cierras o recargas la página accidentalmente.</div>
+
+  <!-- DISCORD TAB -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon" style="font-size:15px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#5865f2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.024.015.046.03.06a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    </div>
+    <div class="sec-title">Discord <small>PESTAÑA 2</small></div>
+  </div>
+
+  <div class="card">
+    <p>Gestiona la conexión con tu canal. El punto indicador en la NavBar se enciende en <span class="acc-dc">azul</span> cuando hay conexión activa. Al desconectar se limpia la sesión pero el webhook sigue guardado para la próxima vez.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Flujo con D-Mark activo</div>
+    <p>Cuando hay webhook conectado, HaxRef usa el marcador visual en lugar de mensajes de texto individuales. Al presionar <span class="acc">INICIAR</span> se sube una imagen del canvas a Discord. Cada evento posterior (gol, tarjeta, ½T, FIN) borra esa imagen y publica una nueva actualizada, manteniendo el canal siempre con el marcador más reciente.</p>
+    <p style="margin-top:10px">El marcador de Discord es <span class="acc">estático</span> — los equipos siempre aparecen en su lado original independientemente del swap de medio tiempo.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Canales guardados</div>
+    <p>Puedes guardar múltiples webhooks con nombre para cambiar rápidamente de canal entre partidos. Usa <span class="acc">＋ Añadir</span> para guardar el webhook actual con un nombre. Al hacer click en un perfil guardado se carga ese webhook automáticamente. Cada perfil tiene un botón × para eliminarlo.</p>
+  </div>
+
+  <div class="note"><b>Interval de ping:</b> HaxRef verifica la conexión con el webhook cada ciertos segundos (configurable en Ajustes). Si la conexión se pierde el punto indicador lo refleja.</div>
+
+  <!-- D-MARK -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">🖼️</div>
+    <div class="sec-title">D-Mark <small>PESTAÑA 3</small></div>
+  </div>
+
+  <div class="card">
+    <p>D-Mark es el marcador visual que se publica en Discord como imagen. Muestra el nombre de la liga, jornada, nombres y escudos de los equipos, marcador, estado del partido, barra de progreso y eventos (goles y tarjetas) de ambos tiempos.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🛡️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Escudos de equipo</div>
+        <div class="row-item-desc">Sube un PNG para cada equipo. Aparecen tanto en el marcador de Discord como encima de los números en la pantalla principal de la app. Puedes guardar logos en la biblioteca y reutilizarlos. Si no hay logo subido, el canvas muestra un círculo de color representativo en lugar de un emoji — más consistente entre plataformas.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">📝</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Info del marcador</div>
+        <div class="row-item-desc">Configura el nombre de la <span class="acc">Liga / Torneo</span>, la <span class="acc">Jornada / Fase</span> y la <span class="acc">duración por tiempo</span> en minutos. Estos datos aparecen en el marcador publicado en Discord.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🎨</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Colores por estado</div>
+        <div class="row-item-desc">Personaliza el color de la barra de progreso y del estado según el momento del partido: <span class="acc">En juego</span>, <span class="acc">Medio tiempo</span> y <span class="acc">Final</span>. Cada uno tiene su propio selector con vista previa en tiempo real. Los cambios se guardan automáticamente.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🔡</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Colores de texto — modo AUTO / manual</div>
+        <div class="row-item-desc">Por defecto el toggle <span class="acc">AUTO</span> está activo y los textos se calculan automáticamente según el color de fondo. Al desactivarlo se expanden selectores individuales para: nombres de equipos, marcador, liga/jornada y eventos.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🖼️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Fondo personalizado</div>
+        <div class="row-item-desc">Sube una imagen de fondo para el marcador de Discord. Se aplica centrada y escalada con una capa de oscurecimiento para mantener la legibilidad del texto.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">📊</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Barra de progreso</div>
+        <div class="row-item-desc">La barra bajo el marcador refleja el tiempo transcurrido respecto a la duración configurada por tiempo. Tiene extremos redondeados y cambia de color según el estado. En HT o FIN se pinta completa en su color correspondiente.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⚽</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Eventos por tiempo</div>
+        <div class="row-item-desc">Los goles y tarjetas se dividen automáticamente en 1T y 2T, separados por una línea con degradado. El primer tiempo aparece arriba y el segundo abajo. Una línea sutil separa la zona del marcador de la zona de eventos para mejorar la legibilidad.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> el marcador de Discord es estático — los nombres, logos y eventos siempre se muestran en su lado original sin importar el swap de medio tiempo. El swap solo afecta la vista interna de la app.</div>
+
+  <!-- EXPORTAR -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">💾</div>
+    <div class="sec-title">Exportar / Importar <small>PESTAÑA 4</small></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Partidos</div>
+    <p>Selecciona uno o varios partidos con sus checkboxes. <span class="acc">☑ TODO</span> marca o desmarca todos de una vez. <span class="acc">⬆ IMPORTAR .TXT</span> carga un archivo exportado previamente — HaxRef detecta los partidos, pide confirmación y los agrega sin duplicar (compara por ID). <span class="acc">⬇ EXPORTAR .TXT</span> descarga los partidos seleccionados con nombres, marcador, hora y fecha.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Webhooks</div>
+    <p>Exporta e importa tus URLs de webhook en formato <span class="mono">.json</span>. Útil para trasladar tus canales guardados a otro dispositivo o navegador.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Ajustes</div>
+    <p>Exporta e importa la configuración de la app en <span class="mono">.json</span>: duración de tiempos, idioma, tema, colores D-Mark, y demás preferencias guardadas.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Backup completo</div>
+    <p>Combina partidos, webhooks y ajustes en un único <span class="mono">.json</span> con <span class="acc">⬇ TODO EN .JSON</span>. Para restaurar usa <span class="acc">⬆ RESTAURAR .JSON</span>. Ideal para migrar a otro dispositivo o hacer respaldo antes de limpiar el navegador.</p>
+  </div>
+
+  <!-- ── AJUSTES ── -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">⚙️</div>
+    <div class="sec-title">Ajustes <small>ENGRANE</small></div>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🔔</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Intervalo de ping</div>
+        <div class="row-item-desc">Cada cuántos segundos se verifica la conexión con el webhook. Por defecto 30 s.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">📐</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Mini modo</div>
+        <div class="row-item-desc">Compacta el marcador para pantallas pequeñas o cuando HaxRef se usa en ventana reducida.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🌓</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Tema</div>
+        <div class="row-item-desc">Alterna entre modo oscuro y claro.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🌐</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Idioma</div>
+        <div class="row-item-desc">Español, English y Português disponibles.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🔍</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Zoom</div>
+        <div class="row-item-desc">Ajusta el tamaño visual de la interfaz. El botón <span class="acc">ZOOM ↺</span> en la barra inferior lo regresa al valor por defecto.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HAXREF LIVE ── -->
+  <div class="chapter">
+    <span class="chapter-num">04</span>
+    <span class="chapter-title">HaxRef Live</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">🟢</div>
+    <div class="sec-title">Extensión de Chrome <small>COMPANION</small></div>
+  </div>
+
+  <div class="card">
+    <p>HaxRef Live es una extensión de Chrome que lee el estado del partido directamente desde HaxBall y lo envía a HaxRef Pro en tiempo real. Actúa como puente entre el juego y la app de arbitraje, sincronizando goles, períodos y pausas automáticamente.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🔴</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Indicador en la NavBar</div>
+        <div class="row-item-desc">Un pequeño punto entre el logo y las pestañas muestra el estado de la conexión: <span class="acc" style="color:#888">gris</span> = desconectado, <span class="acc" style="color:#4caf50">verde</span> = conectado. La conexión se establece automáticamente cuando la extensión está activa en la pestaña de HaxBall.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⚽</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Goles automáticos</div>
+        <div class="row-item-desc">Cuando la extensión detecta un gol en HaxBall, lo registra en HaxRef Pro con un debounce de 3 s para evitar duplicados. El árbitro puede confirmar, corregir o cancelar desde el countdown antes del envío a Discord.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⏸</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Confirmación de medio tiempo — en HaxBall</div>
+        <div class="row-item-desc">Al terminar el primer tiempo, HaxBall emite "Game stopped" y el overlay muestra un modal de confirmación <span class="pill">½ TIEMPO</span> directamente encima del juego. El árbitro confirma ahí mismo sin tener que cambiar de ventana. Si no responde en 30 segundos el modal se cierra solo. Al confirmar, HaxRef Pro procesa el ½T automáticamente.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">▶️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Inicio de 2T automático</div>
+        <div class="row-item-desc">Cuando HaxBall reanuda el partido tras el ½T, la extensión detecta el "Game started" y HaxRef Pro inicia el segundo tiempo automáticamente — resetea el cronómetro a 0 y envía el embed correspondiente a Discord.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🎛️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Botones de control en el overlay</div>
+        <div class="row-item-desc">El panel del overlay incluye botones de control de flujo: <span class="pill">½T</span> para solicitar medio tiempo manualmente, <span class="pill">FIN</span> para finalizar el partido y <span class="pill">🟨</span> para registrar tarjetas — todo sin salir de HaxBall. El segundo tiempo se inicia desde el botón <span class="pill">REANUDAR</span> que aparece tras confirmar el ½T.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⏱️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Sincronización de pausas</div>
+        <div class="row-item-desc">Las pausas del juego detectadas por la extensión activan automáticamente el Quick-P en HaxRef Pro, manteniendo el cronómetro sincronizado con el estado real del partido. La píldora de control refleja el estado <span class="acc">PAUSADO</span> en tiempo real.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🚌</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Widget B/P — buses y pausas</div>
+        <div class="row-item-desc">En la esquina inferior derecha del juego aparece un widget colapsable para llevar la cuenta de <span class="acc">buses (B)</span> y <span class="acc">pausas (P)</span> de cada equipo. Cada contador tiene botones <span class="pill">−</span> y <span class="pill">+</span>. Al llegar al límite de buses configurado, el contador muestra un aviso de <span class="acc">⚠ PENAL</span> y vuelve a cero. El botón <span class="pill">📋 COPIAR MARCADOR</span> genera el string de marcador completo listo para pegar en el chat de HaxBall. Los límites se configuran en el popup de la extensión. Los contadores se resetean automáticamente al iniciar un nuevo partido y se swapean con los equipos al medio tiempo.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🔄</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Reconexión automática</div>
+        <div class="row-item-desc">Si la conexión se interrumpe (recarga de HaxBall, cambio de sala), la extensión reintenta conectarse cada 4 segundos sin necesidad de intervención manual.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> HaxRef Live es opcional. Si no está conectado, todas las funciones de HaxRef Pro siguen funcionando normalmente — solo se pierden las automatizaciones. Los botones de ½T siguen disponibles para operación manual desde HaxRef Pro.</div>
+
+  <!-- ── LIGAS ── -->
+  <div class="chapter">
+    <span class="chapter-num">05</span>
+    <span class="chapter-title">Ligas</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">🏆</div>
+    <div class="sec-title">Gestor de ligas <small>PÁGINA INDEPENDIENTE</small></div>
+  </div>
+
+  <div class="card">
+    <p>La sección de Ligas es una página separada accesible desde el launcher. Sirve para organizar los equipos de tus torneos o ligas habituales: guarda nombre y logo de cada equipo y los tiene disponibles para reutilizar en cualquier partido sin tener que subirlos de nuevo.</p>
+  </div>
+
+  <div class="row-list" style="margin-bottom:14px">
+    <div class="row-item">
+      <div class="row-item-icon">🏆</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Crear una liga</div>
+        <div class="row-item-desc">Pulsa <span class="acc">+</span> en el panel izquierdo e ingresa el nombre. La liga aparece en la lista y queda seleccionada. El nombre es editable en cualquier momento haciendo click sobre él en el panel de detalle.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🛡️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Añadir equipos</div>
+        <div class="row-item-desc">Con una liga seleccionada, usa el botón <span class="acc">+ AÑADIR</span> en el grid. Ingresa el nombre del equipo y opcionalmente sube su logo (PNG, SVG, WebP). El logo se comprime automáticamente a 128×128 px en WebP para no ocupar espacio innecesario.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">✏️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Editar equipos</div>
+        <div class="row-item-desc">Al pasar el cursor sobre una tarjeta de equipo aparecen los botones <span class="acc">✏</span> (editar nombre o logo) y <span class="acc">✕</span> (eliminar). Los cambios se reflejan de inmediato en el grid.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🔗</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Sincronización con D-Mark</div>
+        <div class="row-item-desc">Cada vez que añades o editas un equipo con logo, ese logo se guarda automáticamente en la biblioteca de escudos de HaxRef Pro (la misma que usa D-Mark). Al iniciar un partido y configurar los escudos, los logos de tus ligas ya estarán disponibles sin necesidad de subirlos otra vez.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">⬇️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Exportar / Importar</div>
+        <div class="row-item-desc">Cada liga se puede exportar como <span class="mono">.json</span> con el botón <span class="acc">⬇ EXPORTAR</span>. El archivo incluye el nombre, todos los equipos y sus logos en base64. Para restaurar o compartir una liga usa <span class="acc">⬆ IMPORTAR</span> en el encabezado — si ya existe una liga con el mismo nombre, pregunta si reemplazarla.</div>
+      </div>
+    </div>
+    <div class="row-item">
+      <div class="row-item-icon">🗑️</div>
+      <div class="row-item-body">
+        <div class="row-item-title">Eliminar</div>
+        <div class="row-item-desc">El botón <span class="acc">× </span>junto a cada liga en el sidebar la elimina con todos sus equipos. También puedes eliminar la liga activa desde el botón <span class="acc">🗑 ELIMINAR LIGA</span> dentro del detalle. Ambas acciones piden confirmación.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Almacenamiento:</b> las ligas se guardan en <span class="mono">localStorage</span> bajo la clave <span class="mono">haxref_ligas</span>. Se incluyen en el backup completo de la pestaña Exportar, así que no se pierden al limpiar la caché si tienes una copia reciente.</div>
+
+  <!-- ── SHORTCUTS ── -->
+  <div class="chapter">
+    <span class="chapter-num">06</span>
+    <span class="chapter-title">Shortcuts</span>
+    <div class="chapter-line"></div>
+  </div>
+
+  <div class="sec-header">
+    <div class="sec-icon">⌨️</div>
+    <div class="sec-title">Atajos de teclado y ratón</div>
+  </div>
+
+  <div class="card">
+    <div class="shortcut-grid">
+
+      <div class="shortcut-keys"><kbd>Ctrl</kbd><span>+</span><kbd>.</kbd></div>
+      <div class="shortcut-desc"><span class="acc-blue">Gol equipo azul</span> <span class="muted">(ventana de 1 s tras pulsar Ctrl)</span></div>
+
+      <div class="shortcut-keys"><kbd>Ctrl</kbd><span>+</span><kbd>-</kbd></div>
+      <div class="shortcut-desc"><span class="acc-red">Gol equipo rojo</span> <span class="muted">(ventana de 1 s tras pulsar Ctrl)</span></div>
+
+      <div class="shortcut-sep"></div>
+
+      <div class="shortcut-keys"><kbd>1</kbd></div>
+      <div class="shortcut-desc">Ir a Marcador</div>
+
+      <div class="shortcut-keys"><kbd>2</kbd></div>
+      <div class="shortcut-desc">Ir a Discord</div>
+
+      <div class="shortcut-keys"><kbd>3</kbd></div>
+      <div class="shortcut-desc">Ir a D-Mark</div>
+
+      <div class="shortcut-keys"><kbd>4</kbd></div>
+      <div class="shortcut-desc">Ir a Exportar</div>
+
+      <div class="shortcut-sep"></div>
+
+      <div class="shortcut-keys"><kbd>Enter</kbd></div>
+      <div class="shortcut-desc">Confirmar en modales de jugador / motivo</div>
+
+    </div>
+  </div>
+
+  <div class="note"><b>Nota:</b> los atajos de número <kbd>1</kbd>–<kbd>4</kbd> solo funcionan cuando no hay ningún modal abierto.</div>
+
+  <!-- REDES -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">🔗</div>
+    <div class="sec-title">Redes <small>PESTAÑA 🔗</small></div>
+  </div>
+
+  <div class="card">
+    <p>Accesos directos a la comunidad y el desarrollador. Desde aquí puedes entrar al <span class="acc">servidor de Discord</span> oficial de HaxRef, al canal de <span class="acc">YouTube</span> y copiar el usuario del desarrollador al portapapeles con un toque.</p>
+  </div>
+
+  <!-- SALIR -->
+  <div class="sec-header" style="margin-top:36px">
+    <div class="sec-icon">⏻</div>
+    <div class="sec-title">Botón salir</div>
+  </div>
+
+  <div class="card">
+    <p>El botón <span class="acc">✕</span> al extremo derecho de la NavBar recarga la página y vuelve al launcher. El partido se auto-guarda antes de salir si tiene goles, tarjetas u hora de inicio registrada.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-title">HaxRef Pro 2.5</div>
+  <div class="ft-by">by tutanka</div>
+</footer>
+
+</body>
+</html>
